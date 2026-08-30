@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useRef, type RefObject } from "react";
+import { useFrame } from "@react-three/fiber";
 import { OrbitControls, Sparkles, Stars } from "@react-three/drei";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
@@ -56,28 +56,25 @@ function FpsProbe() {
   return null;
 }
 
-function CameraRig() {
+function CameraRig({
+  controls,
+}: {
+  controls: RefObject<{ target: THREE.Vector3 } | null>;
+}) {
   const { focusAgentId, data } = useHermes();
-  const { camera } = useThree();
-  const target = useRef(new THREE.Vector3(0, 0, 0));
-
-  useEffect(() => {
-    if (!focusAgentId) {
-      target.current.set(0, 0, 0);
-    }
-  }, [focusAgentId]);
+  const goal = useRef(new THREE.Vector3(0, 0, 0));
 
   useFrame(() => {
     if (focusAgentId) {
       const idx = data.agents.findIndex((a) => a.id === focusAgentId);
       if (idx >= 0) {
         const radius = 3.35 + (idx % 3) * 0.42;
-        target.current.lerp(new THREE.Vector3(radius * 0.35, 0.2, 0), 0.04);
+        goal.current.set(radius * 0.35, 0.2, 0);
       }
     } else {
-      target.current.lerp(new THREE.Vector3(0, 0, 0), 0.03);
+      goal.current.set(0, 0, 0);
     }
-    camera.lookAt(target.current);
+    controls.current?.target.lerp(goal.current, 0.05);
   });
   return null;
 }
@@ -104,6 +101,7 @@ export function NeuralScene() {
     (listening ? 0.28 : 0) +
     voiceLevel * 0.85;
   const group = useRef<THREE.Group>(null);
+  const controls = useRef<{ target: THREE.Vector3 } | null>(null);
 
   useFrame(({ clock }) => {
     if (group.current) {
@@ -139,6 +137,8 @@ export function NeuralScene() {
       <Sparkles count={120} scale={7} size={2.4} speed={listening ? 0.9 : 0.35} opacity={0.6} color="#d4af7a" />
       <Stars radius={48} depth={28} count={1400} factor={3.2} saturation={0} fade speed={0.55} />
       <OrbitControls
+        ref={controls}
+        makeDefault
         enablePan={false}
         enableDamping
         dampingFactor={0.06}
@@ -147,7 +147,7 @@ export function NeuralScene() {
         autoRotate={!focusAgentId && !listening}
         autoRotateSpeed={listening ? 1.6 : thinking ? 1.1 : 0.35}
       />
-      <CameraRig />
+      <CameraRig controls={controls} />
       <FpsProbe />
       <EffectComposer enableNormalPass={false}>
         <Bloom
