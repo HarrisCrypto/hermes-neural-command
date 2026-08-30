@@ -55,20 +55,21 @@
     .panel { padding: 10px; overflow: auto; }
     .pt { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
     .center { display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; }
-    .hero { position: relative; flex: 1; min-height: 300px; overflow: hidden; background: #050408; }
+    .hero { position: relative; flex: 2; min-height: 62vh; overflow: hidden; background: #050408; }
+    .music {
+      position: absolute; top: 10px; right: 10px; z-index: 7; pointer-events: auto;
+      border: 1px solid var(--line); background: rgba(7,6,10,.7); color: var(--ink);
+      border-radius: 999px; padding: 4px 12px; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; cursor: pointer;
+    }
+    .music.on { color: var(--teal); border-color: rgba(62,224,200,.5); box-shadow: 0 0 16px rgba(62,224,200,.25); }
+    .vitals { display: flex; flex-wrap: wrap; gap: 6px; }
     #stage { position: absolute; inset: 0; }
     #stage canvas { display: block; width: 100%; height: 100%; }
-    .ov { position: absolute; top: 8px; left: 8px; right: 8px; display: flex; justify-content: space-between; pointer-events: none; z-index: 5; }
-    .bb { padding: 3px 8px; border-radius: 6px; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; background: rgba(7,6,10,.75); border: 1px solid var(--line); color: var(--gold); }
-    .cog { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 5; pointer-events: none;
-      padding: 4px 12px; border-radius: 99px; font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
-      background: rgba(7,6,10,.8); border: 1px solid rgba(212,175,122,.35); color: var(--gold); }
-    .binf { position: absolute; left: 8px; right: 8px; bottom: 86px; display: flex; gap: 5px; flex-wrap: wrap; pointer-events: none; z-index: 5; }
     .mini { padding: 3px 7px; border-radius: 6px; font-size: 10px; background: rgba(7,6,10,.75); border: 1px solid var(--line); color: #c9d0dc; }
     .mini b { color: var(--teal); font-weight: 500; }
-    .focus-title { position: absolute; top: 16%; left: 50%; transform: translateX(-50%); text-align: center; width: 90%; pointer-events: none; opacity: 0; z-index: 4; transition: opacity .3s; }
+    .focus-title { position: absolute; top: 12px; left: 12px; text-align: left; width: auto; max-width: 46%; pointer-events: none; opacity: 0; z-index: 4; transition: opacity .3s; }
     .focus-title.show { opacity: 1; }
-    .focus-title h2 { font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 500; font-size: clamp(22px, 4vw, 40px); text-shadow: 0 0 28px rgba(212,175,122,.45); }
+    .focus-title h2 { font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 500; font-size: clamp(18px, 2.6vw, 28px); text-shadow: 0 0 28px rgba(212,175,122,.45); }
     .focus-title p { margin-top: 4px; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); }
     .go { pointer-events: auto; display: inline-block; margin-top: 8px; border: 1px solid rgba(62,224,200,.4); background: rgba(7,6,10,.8); color: var(--teal); border-radius: 999px; padding: 4px 12px; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; text-decoration: none; }
     .tile-go { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); text-decoration: none; flex-shrink: 0; }
@@ -128,7 +129,7 @@
       .sidebar { display: grid; grid-template-columns: 1fr 1fr; }
       .sidebar .panel:last-child { grid-column: 1 / -1; }
       .panel-zone { grid-template-columns: 1fr; }
-      .hero { min-height: 360px; }
+      .hero { min-height: 70vh; }
       body, html { height: auto; }
     }
   </style>
@@ -170,26 +171,27 @@
     <main class="center">
       <section class="hero card">
         <div id="stage"></div>
-        <div class="ov"><span class="bb">Neural core · v15</span><span class="bb" id="fps">— FPS</span></div>
-        <div class="cog" id="cogLoad">Cognitive load —</div>
+        <button class="music" id="music" type="button">Music</button>
         <div class="focus-title" id="focusTitle">
           <h2 id="focusName">Neural core</h2>
-          <p id="focusMeta">Tap a glowing project · ask Jarvis by name</p>
+          <p id="focusMeta" hidden></p>
           <a class="go" id="focusOpen" hidden href="#" target="_blank" rel="noopener">Open</a>
         </div>
-        <div class="binf">
-          <span class="mini">Nodes <b id="miniNodes">—</b></span>
-          <span class="mini">Agents <b id="miniAgents">—</b></span>
-          <span class="mini">Synapses <b id="miniSyn">—</b></span>
-          <span class="mini">CPU <b id="miniCpu">—</b></span>
-          <span class="mini">Mem <b id="miniMem">—</b></span>
-        </div>
         <div class="dock">
-          <div class="heard" id="heard">Ask about a project, session, or usage.</div>
+          <div class="heard" id="heard"></div>
           <button class="speak" id="speak" type="button"><span class="orb"></span><strong id="speakLbl">HOLD TO SPEAK</strong></button>
-          <div class="hint" id="statusHint">Hold · release to send</div>
         </div>
       </section>
+
+      <div class="vitals">
+        <span class="mini">Load <b id="cogLoad">—</b></span>
+        <span class="mini">Nodes <b id="miniNodes">—</b></span>
+        <span class="mini">Projects <b id="miniAgents">—</b></span>
+        <span class="mini">Synapses <b id="miniSyn">—</b></span>
+        <span class="mini">CPU <b id="miniCpu">—</b></span>
+        <span class="mini">Mem <b id="miniMem">—</b></span>
+        <span class="mini">FPS <b id="fps">—</b></span>
+      </div>
 
       <div class="panel-zone">
         <div class="panel"><div class="pt">Cortical activity</div><div class="rings" id="gauges"></div></div>
@@ -203,6 +205,7 @@
         <div class="chips">
           <button class="chip" data-cmd="status">Status</button>
           <button class="chip" data-cmd="what are we working on">Projects</button>
+          <button class="chip" data-cmd="play music">Music</button>
           <button class="chip" data-cmd="tell me about PURR therapy">PURR</button>
           <button class="chip" data-cmd="usage">Usage</button>
           <button class="chip" data-cmd="last activity">Activity</button>
@@ -300,6 +303,74 @@
       if (!url) return "Open";
       if (/youtube\.com|youtu\.be/i.test(url)) return "YouTube";
       try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return "Open"; }
+    }
+
+    const SCORE_KEY = "hermes.score";
+    const SCORE_NOTES = [146.83, 174.61, 220, 261.63, 293.66, 220, 174.61, 146.83];
+    let score = null;
+    function scoreBeat() {
+      if (!score) return 0.5 + 0.5 * Math.sin(performance.now() / 690);
+      return 0.5 + 0.5 * Math.sin(score.ctx.currentTime * Math.PI * 2 * 1.2);
+    }
+    function duckScore(amount) {
+      if (!score) return;
+      score.duck.gain.setTargetAtTime(Math.max(0.08, 1 - amount), score.ctx.currentTime, 0.08);
+    }
+    function startScore() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const master = ctx.createGain(); master.gain.value = 0.0001;
+      const duck = ctx.createGain(); duck.gain.value = 1;
+      master.connect(duck); duck.connect(ctx.destination);
+      master.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 1.6);
+      function drone(freq, type, gain) {
+        const o = ctx.createOscillator(); o.type = type; o.frequency.value = freq;
+        const g = ctx.createGain(); g.gain.value = gain;
+        const f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 520;
+        o.connect(f); f.connect(g); g.connect(master); o.start();
+        return o;
+      }
+      const nodes = [drone(73.42, "triangle", 0.1), drone(110, "sine", 0.055), drone(146.83, "sine", 0.04)];
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.16;
+      const noise = ctx.createBufferSource(); noise.buffer = buf; noise.loop = true;
+      const nf = ctx.createBiquadFilter(); nf.type = "lowpass"; nf.frequency.value = 340;
+      const ng = ctx.createGain(); ng.gain.value = 0.045;
+      noise.connect(nf); nf.connect(ng); ng.connect(master); noise.start();
+      nodes.push(noise);
+      let step = 0, timer = 0;
+      function pluck() {
+        if (!score) return;
+        const now = ctx.currentTime;
+        const o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = SCORE_NOTES[step % SCORE_NOTES.length];
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.07, now + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 1.55);
+        o.connect(g); g.connect(master); o.start(now); o.stop(now + 1.6);
+        step += 1;
+        timer = setTimeout(pluck, step % 8 === 0 ? 1320 : 660);
+        score.timer = timer;
+      }
+      timer = setTimeout(pluck, 400);
+      score = { ctx, master, duck, nodes, timer };
+      if (ctx.state === "suspended") ctx.resume();
+    }
+    function stopScore() {
+      if (!score) return;
+      const dying = score; score = null;
+      clearTimeout(dying.timer);
+      dying.master.gain.exponentialRampToValueAtTime(0.0001, dying.ctx.currentTime + 0.45);
+      setTimeout(() => {
+        dying.nodes.forEach((n) => { try { n.stop(); } catch {} });
+        dying.ctx.close();
+      }, 520);
+    }
+    async function setScore(on) {
+      localStorage.setItem(SCORE_KEY, on ? "1" : "0");
+      if (on && !score) startScore();
+      if (!on && score) stopScore();
+      $("music").classList.toggle("on", !!score);
     }
     function keyName(value) {
       return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
@@ -403,6 +474,14 @@
       const s = q.toLowerCase();
       const c = catalog();
 
+      if (/music on|play (the )?(music|score)|turn on (the )?(music|score)|start (the )?(music|score)|chamber score|put on music/.test(s)) {
+        setScore(true);
+        return "Opening the chamber score.";
+      }
+      if (/music off|stop (the )?(music|score)|turn off (the )?(music|score)|quiet the (room|score)|kill the music/.test(s)) {
+        setScore(false);
+        return "Score closed.";
+      }
       if (/open|launch|take me to|go to|visit/.test(s)) {
         const target = c.projects.find((p) => includesName(s, p.name));
         if (target && target.href) {
@@ -507,7 +586,6 @@
       state.spinning = 1;
       if (web && web.nodes) web.nodes.forEach((node) => { node.park = null; });
       $("focusName").textContent = n.label;
-      $("focusMeta").textContent = (n.kind === "project" ? "Project" : n.kind || "node") + " · " + Math.round((n.load || 0) * 100) + "%";
       $("focusTitle").classList.add("show");
       const open = $("focusOpen");
       if (open) {
@@ -568,7 +646,7 @@
       $("statCost").textContent = money(c.totals.cost);
       $("statMsgs").textContent = compact(c.totals.messages);
       $("statLoad").textContent = c.load + "%";
-      $("cogLoad").textContent = "Cognitive load " + c.load + "%";
+      $("cogLoad").textContent = c.load + "%";
       $("miniNodes").textContent = String(c.nodes.length);
       $("miniAgents").textContent = String(c.projects.length || c.sessions.length);
       $("miniSyn").textContent = String(state.synCount || c.nodes.length * 2);
@@ -902,7 +980,9 @@
       const v = state.voice;
       const focusId = state.focus && state.focus.id;
       const focused = web.nodes.find((n) => n.data.id === focusId);
-      core.scale.setScalar(1 + Math.sin(t * 1.4) * 0.018 + v * 0.16 + (state.spinning ? 0.04 : 0));
+      const pulse = scoreBeat();
+      group.scale.setScalar(1 + Math.sin(t * 1.25) * 0.045 + pulse * 0.085 + v * 0.1);
+      core.scale.setScalar(1 + Math.sin(t * 1.4) * 0.018 + v * 0.16 + pulse * 0.06 + (state.spinning ? 0.04 : 0));
       inner.rotation.y += 0.01 + v * 0.03;
       inner.scale.setScalar(0.9 + v * 0.45);
       shell.rotation.y -= 0.002; points.rotation.y += 0.0008 + v * 0.01;
@@ -1005,7 +1085,7 @@
         state.fps = state.frames;
         state.frames = 0;
         state.lastFps = now;
-        if ($("fps")) $("fps").textContent = state.fps + " FPS";
+        if ($("fps")) $("fps").textContent = String(state.fps);
       }
     }
     tick();
@@ -1014,7 +1094,7 @@
     const synth = window.speechSynthesis;
     function speakLine(text) {
       $("heard").textContent = text;
-      $("statusHint").textContent = "Ask another question, or hold to speak";
+      if ($("heard") && !state.held) $("heard").dataset.idle = "1";
       if (!synth) return;
       synth.cancel();
       const u = new SpeechSynthesisUtterance(text);
@@ -1067,6 +1147,7 @@
       e.preventDefault();
       try { speakBtn.setPointerCapture(e.pointerId); } catch {}
       state.held = true; state.voice = 0.4; transcript = "";
+      duckScore(0.85);
       speakBtn.classList.add("held");
       $("speakLbl").textContent = "LISTENING";
       $("heard").textContent = "Listening…";
@@ -1079,13 +1160,14 @@
     function endHold(e) {
       e.preventDefault();
       if (!state.held) return;
-      state.held = false; speakBtn.classList.remove("held");
+      state.held = false; duckScore(0); speakBtn.classList.remove("held");
       $("speakLbl").textContent = "HOLD TO SPEAK";
       if (rec) { try { rec.stop(); } catch {} }
       state.voice = 0;
       if (transcript) ask(transcript);
-      else $("statusHint").textContent = "Press and hold · release to send";
+      else if ($("heard") && !$("heard").textContent) $("heard").textContent = "";
     }
+    $("music").onclick = () => setScore(!score);
     speakBtn.addEventListener("pointerdown", startHold);
     speakBtn.addEventListener("pointerup", endHold);
     speakBtn.addEventListener("pointercancel", endHold);

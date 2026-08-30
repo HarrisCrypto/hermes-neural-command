@@ -12,6 +12,7 @@ import { ProjectConstellation } from "@/components/brain/Agents";
 import { HudRings, ScanWave } from "@/components/brain/Rings";
 import { useHermes } from "@/lib/store";
 import { openHref } from "@/lib/board";
+import { getScoreBeat, isScoreOn } from "@/lib/score";
 import { workNodes } from "@/lib/work";
 
 function Lights({ intensity }: { intensity: number }) {
@@ -95,14 +96,20 @@ export function NeuralScene() {
     (thinking ? 0.22 : 0) +
     (boosted ? 0.12 : 0) +
     (listening ? 0.28 : 0) +
-    voiceLevel * 0.85;
+    voiceLevel * 0.85 +
+    (isScoreOn() ? 0.16 : 0);
   const group = useRef<THREE.Group>(null);
+  const breath = useRef<THREE.Group>(null);
   const controls = useRef<OrbitControlsImpl | null>(null);
 
   useFrame(({ clock }) => {
+    const t = clock.elapsedTime;
+    const beat = isScoreOn() ? getScoreBeat() : 0.5 + 0.5 * Math.sin(t * 1.45);
+    const swell = 1 + Math.sin(t * 1.25) * 0.045 + beat * 0.085 + voiceLevel * 0.1;
+    if (breath.current) breath.current.scale.setScalar(swell);
     if (group.current) {
-      group.current.rotation.y += 0.0012;
-      group.current.rotation.x = Math.sin(clock.elapsedTime * 0.28) * 0.08;
+      group.current.rotation.y += 0.0012 + beat * 0.001;
+      group.current.rotation.x = Math.sin(t * 0.28) * 0.08;
     }
   });
 
@@ -111,6 +118,7 @@ export function NeuralScene() {
       <color attach="background" args={["#07060a"]} />
       <fog attach="fog" args={["#07060a", 10, 26]} />
       <Lights intensity={intensity} />
+      <group ref={breath}>
       <group ref={group}>
         <Core intensity={intensity} />
         <Neurons intensity={intensity} />
@@ -140,6 +148,7 @@ export function NeuralScene() {
         }}
       />
       <Sparkles count={120} scale={7} size={2.4} speed={listening ? 0.9 : 0.35} opacity={0.6} color="#d4af7a" />
+      </group>
       <Stars radius={48} depth={28} count={1400} factor={3.2} saturation={0} fade speed={0.55} />
       <OrbitControls
         ref={controls}
@@ -156,7 +165,7 @@ export function NeuralScene() {
       <FpsProbe />
       <EffectComposer enableNormalPass={false}>
         <Bloom
-          intensity={listening ? 1.85 : thinking ? 1.45 : 1.05}
+          intensity={(listening ? 1.85 : thinking ? 1.45 : 1.05) + (isScoreOn() ? getScoreBeat() * 0.45 : 0.12)}
           luminanceThreshold={0.16}
           luminanceSmoothing={0.32}
           mipmapBlur

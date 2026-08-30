@@ -4,7 +4,7 @@ import { FormEvent, PointerEvent, useEffect, useRef, useState } from "react";
 import { useHermes } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
-export function JarvisConsole() {
+export function JarvisConsole({ dock = false }: { dock?: boolean }) {
   const {
     sendCommand,
     transcript,
@@ -18,6 +18,7 @@ export function JarvisConsole() {
   const held = useRef(false);
 
   useEffect(() => {
+    if (dock) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.code === "Space" && document.activeElement?.tagName !== "INPUT") {
         e.preventDefault();
@@ -71,17 +72,20 @@ export function JarvisConsole() {
         : last?.text || "";
 
   return (
-    <div className="flex w-full max-w-[440px] flex-col items-center gap-2.5">
-      <p className="font-serif min-h-[26px] px-4 text-center text-[18px] text-[#d4af7a] italic">
-        {line}
-      </p>
+    <div className={cn("flex w-full flex-col items-center", dock ? "max-w-[420px] gap-1.5" : "max-w-[440px] gap-2.5")}>
+      {line ? (
+        <p className={cn("font-serif px-4 text-center text-[#d4af7a] italic", dock ? "min-h-[22px] text-[15px] line-clamp-2" : "min-h-[26px] text-[18px]")}>
+          {line}
+        </p>
+      ) : null}
       <button
         type="button"
         onPointerDown={onDown}
         onPointerUp={onUp}
         onPointerCancel={onUp}
         className={cn(
-          "flex h-[72px] w-full items-center justify-center gap-3.5 rounded-full border select-none",
+          "flex w-full items-center justify-center gap-3.5 rounded-full border select-none",
+          dock ? "h-12" : "h-[72px]",
           "bg-linear-to-b from-white/10 to-black/50 shadow-[0_18px_50px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.08)]",
           "transition-[transform,box-shadow,border-color] duration-150",
           listening
@@ -101,21 +105,26 @@ export function JarvisConsole() {
           {listening ? "LISTENING" : "HOLD TO SPEAK"}
         </strong>
       </button>
+      {!dock && (
       <p className="text-[11px] tracking-[0.16em] text-[#9aa3b5] uppercase">
         Press and hold · release to send
       </p>
+      )}
+      {!dock && (
       <div className="flex flex-wrap justify-center gap-2">
-        {["status", "what are we working on", "usage", "last activity"].map((cmd) => (
+        {["status", "what are we working on", "play music", "usage", "last activity"].map((cmd) => (
           <button
             key={cmd}
             type="button"
             onClick={() => sendCommand(cmd)}
             className="rounded-full border border-white/10 bg-white/3 px-3 py-1.5 text-[11px] tracking-[0.08em] text-[#e8eef8]"
           >
-            {cmd === "what are we working on" ? "Projects" : cmd === "last activity" ? "Activity" : cmd === "usage" ? "Usage" : "Status"}
+            {cmd === "what are we working on" ? "Projects" : cmd === "last activity" ? "Activity" : cmd === "play music" ? "Music" : cmd === "usage" ? "Usage" : "Status"}
           </button>
         ))}
       </div>
+      )}
+      {!dock && (
       <form onSubmit={onSubmit} className="w-full">
         <input
           value={text}
@@ -124,6 +133,7 @@ export function JarvisConsole() {
           className="w-full border-0 border-b border-white/10 bg-transparent py-2 text-center text-[13px] text-[#e8eef8] outline-none placeholder:text-white/25"
         />
       </form>
+      )}
     </div>
   );
 }

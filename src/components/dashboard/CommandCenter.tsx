@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { HermesProvider, useHermes } from "@/lib/store";
 import { BootSequence } from "@/components/dashboard/BootSequence";
@@ -9,6 +9,7 @@ import { Gauges, LineChart } from "@/components/dashboard/Charts";
 import { fmt, fmtCost } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { HOUSE_PROJECTS, linkLabel, openHref } from "@/lib/board";
+import { isScoreOn, subscribeScore, toggleScore } from "@/lib/score";
 import { workNodes } from "@/lib/work";
 
 const BrainCanvas = dynamic(
@@ -47,9 +48,10 @@ function Shell() {
     setProjectHref,
   } = useHermes();
   const [uplinkOpen, setUplinkOpen] = useState(false);
+  const [scoreOn, setScoreOn] = useState(false);
+  useEffect(() => subscribeScore(setScoreOn), []);
   const nodules = workNodes(data);
   const focusProject = nodules.find((p) => p.id === focusAgentId);
-  const focusAgent = data.agents.find((a) => a.id === focusAgentId);
   const maxTool = Math.max(...data.tools.map((t) => t.count), 1);
 
   if (!booted) return <BootSequence />;
@@ -178,47 +180,54 @@ function Shell() {
       </aside>
 
       <main className="flex min-h-0 min-w-0 flex-col gap-2">
-        <section className="relative min-h-[300px] flex-1 overflow-hidden rounded-[14px] border border-white/8 bg-[#050408]">
+        <section className="relative min-h-[62vh] flex-[2] overflow-hidden rounded-[14px] border border-white/8 bg-[#050408] md:min-h-[68vh]">
           <BrainCanvas />
-          <div className="pointer-events-none absolute inset-x-2 top-2 z-10 flex justify-between">
-            <Badge>Neural core · v15</Badge>
-            <Badge>{`${fps} FPS`}</Badge>
-          </div>
-          <div className="pointer-events-none absolute top-2 left-1/2 z-10 -translate-x-1/2 rounded-full border border-[#d4af7a]/35 bg-[#07060a]/80 px-3 py-1 text-[9px] tracking-[0.14em] text-[#d4af7a] uppercase">
-            Cognitive load {Math.round(data.cognitiveLoad)}%
-          </div>
-          {(focusProject || focusAgent) && (
-            <div className="absolute top-[16%] right-0 left-0 z-10 text-center">
-              <h2 className="pointer-events-none font-serif text-[clamp(22px,4vw,40px)] italic [text-shadow:0_0_28px_rgba(212,175,122,.45)]">
-                {focusProject?.name ?? focusAgent?.name}
+          <button
+            type="button"
+            onClick={() => void toggleScore()}
+            className={cn(
+              "absolute top-3 right-3 z-10 rounded-full border px-3 py-1 text-[10px] tracking-[0.18em] uppercase",
+              scoreOn
+                ? "border-[#3ee0c8]/50 bg-[#07060a]/80 text-[#3ee0c8] shadow-[0_0_16px_rgba(62,224,200,.25)]"
+                : "border-white/12 bg-[#07060a]/70 text-[#9aa3b5]",
+            )}
+          >
+            Music
+          </button>
+          {focusProject && (
+            <div className="absolute top-3 left-3 z-10 max-w-[46%]">
+              <h2 className="font-serif text-[clamp(18px,2.6vw,28px)] italic [text-shadow:0_0_28px_rgba(212,175,122,.45)]">
+                {focusProject.name}
               </h2>
-              <p className="pointer-events-none text-[10px] tracking-[0.16em] text-[#9aa3b5] uppercase">
-                {focusProject
-                  ? `Project · ${focusProject.progress}%`
-                  : `${focusAgent?.role} · ${Math.round(focusAgent?.load ?? 0)}% load`}
-              </p>
-              {focusProject?.href && (
+              {focusProject.href && (
                 <button
                   type="button"
                   onClick={() => openHref(focusProject.href)}
-                  className="mt-2 rounded-full border border-[#3ee0c8]/40 bg-[#07060a]/80 px-3 py-1 text-[10px] tracking-[0.16em] text-[#3ee0c8] uppercase"
+                  className="mt-1 rounded-full border border-[#3ee0c8]/40 bg-[#07060a]/80 px-2.5 py-0.5 text-[9px] tracking-[0.16em] text-[#3ee0c8] uppercase"
                 >
                   Open {linkLabel(focusProject.href)}
                 </button>
               )}
             </div>
           )}
-          <div className="pointer-events-none absolute inset-x-2 bottom-[86px] z-10 flex flex-wrap gap-1.5">
-            <Mini l="Nodes" v={String(nodules.length)} />
-            <Mini l="Projects" v={String(data.projects.length || nodules.length)} />
-            <Mini l="Synapses" v={String(Math.max(0, nodules.length * 3))} />
-            <Mini l="CPU" v={`${Math.round(data.system.cpu)}%`} />
-            <Mini l="Mem" v={`${data.system.memoryUsed.toFixed(0)}/${data.system.memoryTotal}`} />
-          </div>
-          <div className="absolute inset-x-0 bottom-0 z-10 flex justify-center bg-linear-to-b from-transparent to-[#07060a]/80 px-2 pt-2 pb-2">
-            <JarvisConsole />
+          <div className="absolute inset-x-0 bottom-0 z-10 flex justify-center bg-linear-to-b from-transparent to-[#07060a]/80 px-2 pt-6 pb-2">
+            <JarvisConsole dock />
           </div>
         </section>
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Mini l="Load" v={`${Math.round(data.cognitiveLoad)}%`} />
+          <Mini l="Nodes" v={String(nodules.length)} />
+          <Mini l="Projects" v={String(data.projects.length || nodules.length)} />
+          <Mini l="Synapses" v={String(Math.max(0, nodules.length * 3))} />
+          <Mini l="CPU" v={`${Math.round(data.system.cpu)}%`} />
+          <Mini l="Mem" v={`${data.system.memoryUsed.toFixed(0)}/${data.system.memoryTotal}`} />
+          <Mini l="FPS" v={String(fps)} />
+        </div>
+
+        <div className="glass p-2.5">
+          <JarvisConsole />
+        </div>
 
         <div className="grid gap-2 md:grid-cols-3">
           <Side title="Cortical activity">
@@ -256,14 +265,6 @@ function Chip({ v, l }: { v: string; l: string }) {
       <div className="font-serif text-[16px] leading-none text-[#d4af7a]">{v}</div>
       <div className="mt-0.5 text-[8px] tracking-[0.12em] text-[#9aa3b5] uppercase">{l}</div>
     </div>
-  );
-}
-
-function Badge({ children }: { children: string }) {
-  return (
-    <span className="rounded-md border border-white/8 bg-[#07060a]/75 px-2 py-0.5 text-[9px] tracking-[0.12em] text-[#d4af7a] uppercase">
-      {children}
-    </span>
   );
 }
 

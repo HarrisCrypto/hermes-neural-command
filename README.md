@@ -9,7 +9,7 @@ GitHub Pages (same file as `standalone/index.html` / `docs/index.html`):
 **https://harriscrypto.github.io/hermes-neural-command/**
 
 1. Tap **HOLD TO SPEAK** and keep your finger down.
-2. Talk. The core should bloom with your voice.
+2. Talk. The core should bloom with your voice. Tap **Music** if you want the chamber score with the pulse.
 3. Release to send. Jarvis answers out loud.
 4. Drag the brain. Tap a glowing project nodule — synapses fire, and that work spins to the front. Ask Jarvis about a project by name and the same nodule comes forward.
 5. **Uplink** once if her tunnel URL changed. Under Destinations, paste the PURR YouTube URL and Sam’s site. After that, tap **Open** (or say “open PURR”) and the glass sends you there.

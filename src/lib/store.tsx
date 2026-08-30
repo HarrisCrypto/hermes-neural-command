@@ -21,6 +21,7 @@ import {
 import { defaultHermesOrigin, isHttpOrigin } from "@/lib/protocol";
 import { createInitialData, nextActivity, tickData } from "@/lib/simulation";
 import { mergeBoard, openHref, writeDestination } from "@/lib/board";
+import { duckScore, setScore } from "@/lib/score";
 import { uid } from "@/lib/format";
 import type { FeedKind, HermesData, TranscriptLine, ViewId } from "@/lib/types";
 
@@ -214,6 +215,7 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
         if (action.boost !== undefined) setBoosted(action.boost);
         if (action.voice !== undefined) setVoiceEnabled(action.voice);
         if (action.openUrl) openHref(action.openUrl);
+        if (action.music !== undefined) void setScore(action.music);
         setTranscript((prev) => [
           ...prev,
           { id: uid("j"), role: "jarvis", text: action.reply, at: Date.now() },
@@ -262,6 +264,7 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
     setListening(true);
     setVoiceEnabled(true);
     setVoiceLevel(0.4);
+    duckScore(0.85);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
       if (!listenRef.current) {
@@ -305,6 +308,7 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
     if (!listenRef.current) return;
     listenRef.current = false;
     setListening(false);
+    duckScore(0);
     try {
       recRef.current?.stop();
     } catch {

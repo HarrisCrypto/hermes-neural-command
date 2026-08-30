@@ -66,6 +66,13 @@ export function interpretCommand(
     };
   }
 
+  if (/\b(music on|play (the )?(music|score|soundtrack)|turn on (the )?(music|score)|start (the )?(music|score)|chamber score|put on music)\b/.test(s)) {
+    return { reply: "Opening the chamber score.", music: true };
+  }
+  if (/\b(music off|stop (the )?(music|score)|turn off (the )?(music|score)|quiet the (room|score)|kill the music)\b/.test(s)) {
+    return { reply: "Score closed.", music: false };
+  }
+
   if (/\b(mute|silence|quiet voice)\b/.test(s)) {
     return { reply: "Voice closed. Replies stay on the glass.", voice: false };
   }
