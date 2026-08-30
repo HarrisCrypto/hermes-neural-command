@@ -249,6 +249,10 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
     setVoiceLevel(0.4);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      if (!listenRef.current) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
       const ctx = new AudioContext();
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 256;

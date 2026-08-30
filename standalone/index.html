@@ -635,6 +635,7 @@
       $("statusHint").textContent = "Release to send";
       $("heard").textContent = "Listening…";
       await openMic();
+      if (!state.held) return;
       if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
       cancelAnimationFrame(voiceRaf);
       sampleVoice();
