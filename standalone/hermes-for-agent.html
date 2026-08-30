@@ -14,7 +14,7 @@
       --ice: #e8eef8;
       --teal: #3ee0c8;
       --ink: #9aa3b5;
-      --glass: rgba(10, 10, 14, 0.55);
+      --glass: rgba(12, 11, 16, 0.62);
       --line: rgba(232, 238, 248, 0.08);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,51 +23,89 @@
       font-family: Outfit, system-ui, sans-serif;
       -webkit-font-smoothing: antialiased;
       min-height: 100%;
+      background:
+        radial-gradient(ellipse 80% 50% at 10% -10%, rgba(212,175,122,.14), transparent 50%),
+        radial-gradient(ellipse 70% 40% at 100% 20%, rgba(62,224,200,.07), transparent 46%),
+        radial-gradient(ellipse 60% 30% at 50% 100%, rgba(212,175,122,.05), transparent 50%),
+        var(--bg);
     }
     header {
       position: sticky; top: 0; z-index: 12;
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: max(12px, env(safe-area-inset-top)) 16px 10px;
-      background: rgba(7,6,10,.82);
-      backdrop-filter: blur(18px);
+      padding: max(12px, env(safe-area-inset-top)) 0 0;
+      background: rgba(7,6,10,.72);
+      backdrop-filter: blur(22px);
       border-bottom: 1px solid var(--line);
     }
-    .wordmark { font-family: "Cormorant Garamond", serif; font-size: 20px; letter-spacing: .24em; }
+    .head-inner, .wrap { width: min(1180px, 100%); margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+    .head-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 10px; }
+    .wordmark { font-family: "Cormorant Garamond", serif; font-size: 20px; letter-spacing: .28em; }
     .wordmark span { color: var(--gold); }
     .live { display: flex; align-items: center; gap: 8px; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink); }
     .dot { width: 7px; height: 7px; border-radius: 50%; background: #c45a4a; box-shadow: 0 0 10px #c45a4a; }
     .dot.on { background: var(--teal); box-shadow: 0 0 12px var(--teal); }
     .ghost { background: none; border: 0; color: var(--ink); font: inherit; letter-spacing: .16em; text-transform: uppercase; font-size: 10px; cursor: pointer; }
+    .jump { display: flex; gap: 18px; overflow-x: auto; padding: 0 16px 10px; width: min(1180px, 100%); margin: 0 auto; }
+    .jump a { color: var(--ink); text-decoration: none; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; }
+    .jump a:hover { color: var(--gold); }
 
-    .wrap { width: min(1120px, 100%); margin: 0 auto; padding: 0 14px 28px; }
-    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
-    @media (min-width: 720px) { .stats { grid-template-columns: repeat(5, 1fr); } }
+    .wrap { padding-top: 18px; padding-bottom: 40px; }
+    .rail {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      border: 1px solid rgba(212,175,122,.18);
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(212,175,122,.07), rgba(10,10,14,.35));
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+    @media (min-width: 800px) { .rail { grid-template-columns: repeat(5, 1fr); } }
+    .stat { padding: 14px 16px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .stat:nth-child(2n) { border-right: 0; }
+    @media (min-width: 800px) {
+      .stat { border-bottom: 0; }
+      .stat:nth-child(2n) { border-right: 1px solid var(--line); }
+      .stat:last-child { border-right: 0; }
+    }
+    .k { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink); }
+    .v { font-family: "Cormorant Garamond", serif; font-size: 28px; line-height: 1.05; margin-top: 6px; }
+    .muted { color: var(--ink); }
     .card {
+      position: relative;
       background: var(--glass);
       border: 1px solid var(--line);
-      backdrop-filter: blur(18px);
-      border-radius: 16px;
-      padding: 13px 14px;
+      backdrop-filter: blur(20px);
+      border-radius: 22px;
+      padding: 18px 18px 16px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
     }
-    .k { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink); }
-    .v { font-family: "Cormorant Garamond", serif; font-size: 24px; margin-top: 2px; }
-    .muted { color: var(--ink); }
-    .row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--line); }
-    .row:last-child { border-bottom: 0; }
-    .grid2 { display: grid; gap: 10px; margin-top: 10px; }
-    @media (min-width: 860px) { .grid2 { grid-template-columns: 1fr 1fr; } }
+    .card::before {
+      content: "";
+      position: absolute; top: 0; left: 18%; right: 18%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212,175,122,.45), transparent);
+    }
+    .sec-h {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+      margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    .sec-h h3 { font-family: "Cormorant Garamond", serif; font-size: 26px; font-weight: 500; letter-spacing: .02em; }
+    .sec-h .idx { color: var(--gold); font-size: 11px; letter-spacing: .22em; }
+    .grid2 { display: grid; gap: 14px; margin-top: 16px; }
+    @media (min-width: 900px) { .grid2 { grid-template-columns: 1.15fr .85fr; } }
+    .grid-vitals { display: grid; gap: 14px; margin-top: 14px; }
+    @media (min-width: 900px) { .grid-vitals { grid-template-columns: 1fr 1fr; } }
 
     .hero {
       position: relative;
-      border-radius: 22px;
+      border-radius: 26px;
       overflow: hidden;
-      border: 1px solid var(--line);
+      border: 1px solid rgba(212,175,122,.16);
       background: #050408;
+      box-shadow: 0 30px 80px rgba(0,0,0,.35);
     }
-    #stage { height: min(58vh, 520px); min-height: 280px; }
+    #stage { height: min(56vh, 500px); min-height: 270px; }
     #stage canvas { display: block; width: 100%; height: 100%; }
     .focus-title {
-      position: absolute; top: 14%; left: 50%; transform: translateX(-50%);
+      position: absolute; top: 12%; left: 50%; transform: translateX(-50%);
       text-align: center; pointer-events: none; opacity: 0; transition: opacity .3s;
       width: 90%;
     }
@@ -75,10 +113,10 @@
     .focus-title h2 { font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 500; font-size: clamp(26px, 6vw, 46px); }
     .focus-title p { margin-top: 4px; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink); }
 
-    .dock { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 12px 16px; }
+    .dock { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 14px 18px; background: linear-gradient(180deg, transparent, rgba(7,6,10,.55)); }
     .heard {
       min-height: 44px; text-align: center; padding: 0 8px;
-      font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 17px; color: var(--gold);
+      font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 18px; color: var(--gold);
     }
     .speak {
       appearance: none; border: 0; cursor: pointer;
@@ -94,22 +132,48 @@
     .speak strong { font-size: 12px; letter-spacing: .26em; font-weight: 500; }
     .hint { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink); text-align: center; }
     .chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-    .chip, button.rowish {
-      border: 1px solid var(--line); background: rgba(255,255,255,.03);
-      color: var(--ice); border-radius: 999px; padding: 7px 12px; font-size: 11px; letter-spacing: .06em;
+    .chip {
+      border: 1px solid rgba(212,175,122,.2); background: rgba(255,255,255,.03);
+      color: var(--ice); border-radius: 999px; padding: 7px 13px; font-size: 11px; letter-spacing: .08em;
     }
     .ask { width: 100%; max-width: 420px; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ice); font: inherit; text-align: center; padding: 8px 0; outline: none; }
 
-    .uplink { display: none; margin: 10px 0 0; }
+    .uplink { display: none; margin: 0 0 14px; }
     .uplink.open { display: block; }
     .uplink input { width: 100%; margin-top: 8px; background: transparent; border: 0; border-bottom: 1px solid var(--line); color: var(--ice); font: inherit; padding: 8px 0; outline: none; }
 
-    .bar { height: 4px; background: rgba(255,255,255,.08); border-radius: 99px; overflow: hidden; margin-top: 6px; }
-    .bar > i { display: block; height: 100%; background: var(--teal); }
-    .bar.gold > i { background: var(--gold); }
-    .log { font-size: 12px; line-height: 1.45; color: #b8c0ce; max-height: 280px; overflow: auto; }
+    .tile {
+      width: 100%; text-align: left; background: none; border: 0; color: inherit;
+      padding: 12px 0; border-bottom: 1px solid var(--line); cursor: pointer;
+    }
+    .tile:last-child { border-bottom: 0; padding-bottom: 2px; }
+    .tile-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+    .tile-name { font-size: 15px; letter-spacing: .01em; }
+    .tile-num { font-family: "Cormorant Garamond", serif; font-size: 28px; color: var(--gold); line-height: 1; }
+    .tile p { margin-top: 4px; font-size: 12px; color: var(--ink); line-height: 1.45; }
+    .bar { height: 2px; background: rgba(255,255,255,.08); border-radius: 99px; overflow: hidden; margin-top: 10px; }
+    .bar > i { display: block; height: 100%; background: linear-gradient(90deg, #8a6a3a, var(--gold)); }
+    .bar.teal > i { background: linear-gradient(90deg, #14685c, var(--teal)); }
+    .pill { font-size: 9px; letter-spacing: .16em; text-transform: uppercase; padding: 3px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--ink); }
+    .pill.live { color: var(--teal); border-color: rgba(62,224,200,.35); background: rgba(62,224,200,.08); }
+
+    .gauges { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .gauge {
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.025);
+      border: 1px solid var(--line);
+    }
+    .gauge .v { font-size: 22px; }
+
+    .log { max-height: 320px; overflow: auto; padding-left: 14px; border-left: 1px solid rgba(212,175,122,.28); }
+    .log div { position: relative; padding: 0 0 14px 8px; font-size: 13px; line-height: 1.45; color: #c5ccd8; }
+    .log div::before {
+      content: ""; position: absolute; left: -18px; top: 7px; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--gold); box-shadow: 0 0 8px var(--gold);
+    }
     .log b { color: var(--gold); font-weight: 500; }
-    .empty { padding: 10px 0; color: var(--ink); font-size: 13px; }
+    .empty { padding: 18px 4px; color: var(--ink); font-size: 13px; font-family: "Cormorant Garamond", serif; font-style: italic; }
 
     .boot {
       position: fixed; inset: 0; z-index: 30; background: #07060a;
@@ -123,11 +187,20 @@
 </head>
 <body>
   <header>
-    <div class="wordmark">HERMES <span>NDS</span></div>
-    <div style="display:flex;align-items:center;gap:14px">
-      <button class="ghost" id="uplinkBtn" type="button">Uplink</button>
-      <div class="live"><i class="dot" id="liveDot"></i><span id="liveLbl">Local mesh</span></div>
+    <div class="head-inner">
+      <div class="wordmark">HERMES <span>NDS</span></div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <button class="ghost" id="uplinkBtn" type="button">Uplink</button>
+        <div class="live"><i class="dot" id="liveDot"></i><span id="liveLbl">Local mesh</span></div>
+      </div>
     </div>
+    <nav class="jump">
+      <a href="#jarvis">Core</a>
+      <a href="#board">Board</a>
+      <a href="#sessions">Sessions</a>
+      <a href="#vitals">Vitals</a>
+      <a href="#stream">Stream</a>
+    </nav>
   </header>
 
   <div class="wrap">
@@ -137,12 +210,12 @@
       <div class="hint" style="margin-top:8px">Saved on this device. Used when the page is not on her tunnel.</div>
     </div>
 
-    <div class="stats">
-      <div class="card"><div class="k">Sessions</div><div class="v" id="statSessions">—</div></div>
-      <div class="card"><div class="k">Tool calls</div><div class="v" id="statCalls">—</div></div>
-      <div class="card"><div class="k">Tokens</div><div class="v" id="statTokens">—</div></div>
-      <div class="card"><div class="k">Spend</div><div class="v" id="statCost">—</div></div>
-      <div class="card"><div class="k">Load</div><div class="v" id="statLoad">—</div></div>
+    <div class="rail">
+      <div class="stat"><div class="k">Sessions</div><div class="v" id="statSessions">—</div></div>
+      <div class="stat"><div class="k">Tool calls</div><div class="v" id="statCalls">—</div></div>
+      <div class="stat"><div class="k">Tokens</div><div class="v" id="statTokens">—</div></div>
+      <div class="stat"><div class="k">Spend</div><div class="v" id="statCost">—</div></div>
+      <div class="stat"><div class="k">Load</div><div class="v" id="statLoad">—</div></div>
     </div>
 
     <section class="hero" id="jarvis">
@@ -171,25 +244,42 @@
     </section>
 
     <div class="grid2">
-      <article class="card">
-        <div class="k">Programmes</div>
+      <article class="card" id="board">
+        <div class="sec-h">
+          <h3>The board</h3>
+          <span class="idx" id="projCount">01</span>
+        </div>
         <div id="projects"></div>
       </article>
-      <article class="card">
-        <div class="k">Sessions</div>
-        <div id="sessions"></div>
+      <article class="card" id="sessions">
+        <div class="sec-h">
+          <h3>Sessions</h3>
+          <span class="idx" id="sessCount">02</span>
+        </div>
+        <div id="sessionsList"></div>
       </article>
+    </div>
+    <div class="grid-vitals" id="vitals">
       <article class="card">
-        <div class="k">Tools</div>
+        <div class="sec-h">
+          <h3>Tools</h3>
+          <span class="idx">03</span>
+        </div>
         <div id="tools"></div>
       </article>
       <article class="card">
-        <div class="k">System</div>
-        <div id="system"></div>
+        <div class="sec-h">
+          <h3>Vitals</h3>
+          <span class="idx">04</span>
+        </div>
+        <div class="gauges" id="system"></div>
       </article>
     </div>
-    <article class="card" style="margin-top:10px">
-      <div class="k">Live activity</div>
+    <article class="card" id="stream" style="margin-top:14px">
+      <div class="sec-h">
+        <h3>The stream</h3>
+        <span class="idx">05</span>
+      </div>
       <div class="log" id="log"></div>
     </article>
   </div>
@@ -455,22 +545,28 @@
       $("statCost").textContent = money(c.totals.cost);
       $("statLoad").textContent = c.load + "%";
 
+      $("projCount").textContent = String(c.projects.length).padStart(2, "0");
+      $("sessCount").textContent = String(c.sessions.length).padStart(2, "0");
+
       $("projects").innerHTML = c.projects.length
         ? c.projects.map((p) => (
-          `<button type="button" class="row" data-ask="tell me about ${esc(p.name)}" style="width:100%;background:none;border:0;color:inherit;text-align:left">
-            <span><b>${esc(p.name)}</b><div class="muted" style="font-size:12px">${esc(p.description || p.category)}</div>
-            <div class="bar gold"><i style="width:${p.progress}%"></i></div></span>
-            <span class="muted">${p.progress}%</span>
+          `<button type="button" class="tile" data-ask="tell me about ${esc(p.name)}">
+            <div class="tile-top"><span class="tile-name">${esc(p.name)}</span><span class="tile-num">${p.progress}</span></div>
+            <p>${esc(p.description || p.category)}</p>
+            <div class="bar"><i style="width:${p.progress}%"></i></div>
           </button>`
         )).join("")
-        : `<div class="empty">No deliverables yet. Named sessions still appear below — ask Jarvis about any of them.</div>`;
+        : `<div class="empty">No deliverables on the wire. Named sessions still hold the live work — ask Jarvis about any of them.</div>`;
 
-      $("sessions").innerHTML = c.sessions.length
+      $("sessionsList").innerHTML = c.sessions.length
         ? c.sessions.slice(0, 10).map((s) => {
           const live = s.active !== false && s.status !== "idle";
-          return `<button type="button" class="row" data-ask="tell me about ${esc(s.title || s.project)}" style="width:100%;background:none;border:0;color:inherit;text-align:left">
-            <span>${esc(s.title || s.project)}<div class="muted" style="font-size:12px">${esc(s.model || "")} · ${compact(s.tool_calls)} tools · ${money(s.cost)}</div></span>
-            <span class="muted">${live ? "live" : "idle"}</span>
+          return `<button type="button" class="tile" data-ask="tell me about ${esc(s.title || s.project)}">
+            <div class="tile-top">
+              <span class="tile-name">${esc(s.title || s.project)}</span>
+              <span class="pill${live ? " live" : ""}">${live ? "live" : "idle"}</span>
+            </div>
+            <p>${esc(s.model || "core")} · ${compact(s.tool_calls)} tools · ${money(s.cost)}</p>
           </button>`;
         }).join("")
         : `<div class="empty">Waiting for Hermes sessions.</div>`;
@@ -478,26 +574,31 @@
       const maxT = Math.max(...c.tools.map((t) => t.count || 0), 1);
       $("tools").innerHTML = c.tools.length
         ? c.tools.slice(0, 8).map((t) => (
-          `<button type="button" class="row" data-ask="how much do we use ${esc(t.name || t.tool_name)}" style="width:100%;background:none;border:0;color:inherit;text-align:left">
-            <span style="flex:1">${esc(t.name || t.tool_name)}<div class="bar"><i style="width:${((t.count || 0) / maxT) * 100}%"></i></div></span>
-            <span class="muted">${compact(t.count)}</span>
+          `<button type="button" class="tile" data-ask="how much do we use ${esc(t.name || t.tool_name)}">
+            <div class="tile-top"><span class="tile-name">${esc(t.name || t.tool_name)}</span><span class="muted">${compact(t.count)}</span></div>
+            <div class="bar teal"><i style="width:${((t.count || 0) / maxT) * 100}%"></i></div>
           </button>`
         )).join("")
         : `<div class="empty">No tool histogram yet.</div>`;
 
       const sy = c.d.system || {};
-      $("system").innerHTML = `
-        <div class="row"><span>CPU</span><span>${pct(sy.cpu)}%</span></div>
-        <div class="bar"><i style="width:${pct(sy.cpu)}%"></i></div>
-        <div class="row"><span>Memory</span><span>${sy.memory_used != null ? Number(sy.memory_used).toFixed(1) : "—"} / ${sy.memory_total_gb || sy.memory || "—"}</span></div>
-        <div class="row"><span>Disk</span><span>${pct(sy.disk_used_pct || sy.disk)}%</span></div>
-        <div class="row"><span>Uptime</span><span>${esc(sy.uptime || "—")}</span></div>`;
+      const mem = sy.memory_used != null ? Number(sy.memory_used).toFixed(1) : "—";
+      const memT = sy.memory_total_gb || sy.memory || "—";
+      const memP = sy.memory_used != null && sy.memory_total_gb ? (sy.memory_used / sy.memory_total_gb) * 100 : pct(sy.memory);
+      $("system").innerHTML = [
+        ["CPU", pct(sy.cpu) + "%", pct(sy.cpu)],
+        ["Memory", mem + " / " + memT, memP],
+        ["Disk", pct(sy.disk_used_pct || sy.disk) + "%", pct(sy.disk_used_pct || sy.disk)],
+        ["Uptime", sy.uptime || "—", 40],
+      ].map(([k, v, p]) => (
+        `<div class="gauge"><div class="k">${k}</div><div class="v">${esc(v)}</div><div class="bar teal"><i style="width:${Math.min(100, p)}%"></i></div></div>`
+      )).join("");
 
       $("log").innerHTML = c.log.length
         ? c.log.slice(0, 24).map((e) => (
           `<div><span class="muted">${esc(e.time || "")}</span> <b>${esc(e.who || e.tool || e.tool_name || "Hermes")}</b> ${esc(e.what || e.message || e.text || "")}</div>`
         )).join("")
-        : `<div class="empty">Waiting for Hermes…</div>`;
+        : `<div class="empty">The stream is quiet. When Hermes moves, it writes here.</div>`;
     }
 
     /* ---------------- scene ---------------- */
