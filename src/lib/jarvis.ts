@@ -88,6 +88,26 @@ export function interpretCommand(
     return { reply: "Dropping the agent uplink. Local mesh only.", disconnect: true };
   }
 
+  if (/\b(open|launch|take me to|go to|visit|bring up the (site|channel|page))\b/.test(s)) {
+    const target = projectHit(s, data) || board.find((p) => includesName(s, p.name));
+    const href = data.projects.find((p) => p.id === target?.id || (target && p.name === target.name))?.href;
+    if (target && href) {
+      return {
+        reply: `Opening ${target.name}.`,
+        view: "brain",
+        focusAgentId: target.id,
+        openUrl: href,
+      };
+    }
+    if (target) {
+      return {
+        reply: `${target.name} is on the board, but I do not have a destination yet. Open Uplink and paste the YouTube or site URL under Destinations.`,
+        view: "brain",
+        focusAgentId: target.id,
+      };
+    }
+  }
+
   const proj = projectHit(s, data);
   if (proj) {
     const related = data.sessions.filter((x) => includesName(x.title, proj.name) || includesName(proj.name, x.title));
@@ -95,7 +115,7 @@ export function interpretCommand(
       ? ` Bound session “${related[0].title}” — ${fmt(related[0].toolCalls)} tools, ${fmtCost(related[0].cost)}.`
       : "";
     return {
-      reply: `Bringing ${proj.name} to the front. ${proj.progress}% along in ${proj.category}. ${proj.description}${extra}`,
+      reply: `Bringing ${proj.name} to the front. ${proj.progress}% along in ${proj.category}. ${proj.description}${extra}${proj.href ? " Tap Open to go there." : ""}`,
       view: "brain",
       focusAgentId: proj.id,
       selectSessionId: related[0]?.id,

@@ -26,6 +26,6 @@ The nodules on the brain are Jason’s house board, already in the glass:
 - Dashboard
 - Sam's window washing
 
-If you publish `/api/deliverables`, use those same names. Matching programmes overlay progress and copy. Extra programmes are added. Invented stand-ins (Atlas, NDS, myth agents) are ignored.
+If you publish `/api/deliverables`, use those same names. Matching programmes overlay progress and copy. Put click-through on `links: [{ url, label }]` — PURR should be the YouTube channel, Sam’s the website. Extra programmes are added. Invented stand-ins (Atlas, NDS, slime, myth agents) are ignored.
 
 Point every number on the glass at the live dashboard payload, not at placeholders. The hold-to-speak control and the brain are the product — do not wrap them in a cyan panel grid.

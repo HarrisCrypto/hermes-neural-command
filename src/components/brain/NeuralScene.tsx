@@ -11,6 +11,7 @@ import { Neurons, Pulses, Synapses } from "@/components/brain/Neurons";
 import { ProjectConstellation } from "@/components/brain/Agents";
 import { HudRings, ScanWave } from "@/components/brain/Rings";
 import { useHermes } from "@/lib/store";
+import { openHref } from "@/lib/board";
 import { workNodes } from "@/lib/work";
 
 function Lights({ intensity }: { intensity: number }) {
@@ -125,8 +126,12 @@ export function NeuralScene() {
         voiceLevel={voiceLevel}
         onHover={setHoverAgentId}
         onSelect={(id) => {
-          setFocusAgentId(id);
           const node = nodules.find((p) => p.id === id);
+          if (focusAgentId === id && node?.href) {
+            openHref(node.href);
+            return;
+          }
+          setFocusAgentId(id);
           const session = data.sessions.find(
             (s) => s.id === id || s.title === node?.name || s.agentId === id,
           );

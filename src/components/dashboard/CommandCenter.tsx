@@ -8,6 +8,7 @@ import { JarvisConsole } from "@/components/dashboard/JarvisConsole";
 import { Gauges, LineChart } from "@/components/dashboard/Charts";
 import { fmt, fmtCost } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { HOUSE_PROJECTS, linkLabel, openHref } from "@/lib/board";
 import { workNodes } from "@/lib/work";
 
 const BrainCanvas = dynamic(
@@ -43,6 +44,7 @@ function Shell() {
     setFocusAgentId,
     selectSession,
     sendCommand,
+    setProjectHref,
   } = useHermes();
   const [uplinkOpen, setUplinkOpen] = useState(false);
   const nodules = workNodes(data);
@@ -78,31 +80,65 @@ function Shell() {
           </div>
         </div>
         {uplinkOpen && (
-          <input
-            defaultValue={feedOrigin}
-            onBlur={(e) => setFeedOrigin(e.target.value)}
-            placeholder="https://your-tunnel.trycloudflare.com"
-            className="mt-2 w-full border-0 border-b border-white/10 bg-transparent py-2 text-[13px] outline-none"
-          />
+          <div className="mt-2 space-y-2">
+            <input
+              defaultValue={feedOrigin}
+              onBlur={(e) => setFeedOrigin(e.target.value)}
+              placeholder="https://your-tunnel.trycloudflare.com"
+              className="w-full border-0 border-b border-white/10 bg-transparent py-2 text-[13px] outline-none"
+            />
+            <div className="text-[9px] tracking-[0.2em] text-[#d4af7a] uppercase">Destinations</div>
+            <p className="font-serif text-[12px] text-[#9aa3b5] italic">
+              Paste the YouTube channel and Sam’s site once. Clicks open them. Hermes can overlay the same links later.
+            </p>
+            {HOUSE_PROJECTS.map((p) => {
+              const live = nodules.find((n) => n.id === p.id);
+              return (
+                <label key={p.id} className="block">
+                  <span className="text-[10px] tracking-[0.12em] text-[#9aa3b5] uppercase">{p.name}</span>
+                  <input
+                    defaultValue={live?.href || p.href || ""}
+                    onBlur={(e) => setProjectHref(p.id, e.target.value)}
+                    placeholder="https://"
+                    className="w-full border-0 border-b border-white/10 bg-transparent py-1.5 text-[13px] outline-none"
+                  />
+                </label>
+              );
+            })}
+          </div>
         )}
         {feedError && <p className="mt-1 text-[12px] text-rose-300">{feedError}</p>}
       </header>
 
       <aside className="grid grid-cols-2 gap-2 md:flex md:min-h-0 md:flex-col">
         <Side title="Programmes">
-          {data.projects.length === 0 ? (
+          {nodules.length === 0 ? (
             <p className="font-serif text-[12px] text-[#9aa3b5] italic">No programmes yet.</p>
           ) : (
-            data.projects.slice(0, 6).map((p) => (
-              <button key={p.id} type="button" onClick={() => sendCommand(`tell me about ${p.name}`)} className="w-full border-b border-white/6 py-1.5 text-left last:border-0">
-                <div className="flex justify-between gap-2 text-[12px]">
-                  <span className="truncate">{p.name}</span>
-                  <span className="font-serif text-[#d4af7a]">{p.progress}</span>
+            nodules.slice(0, 8).map((p) => (
+              <div key={p.id} className="border-b border-white/6 py-1.5 last:border-0">
+                <div className="flex items-baseline gap-2">
+                  <button type="button" onClick={() => sendCommand(`tell me about ${p.name}`)} className="min-w-0 flex-1 text-left">
+                    <div className="flex justify-between gap-2 text-[12px]">
+                      <span className="truncate">{p.name}</span>
+                      <span className="font-serif text-[#d4af7a]">{p.progress}%</span>
+                    </div>
+                  </button>
+                  {p.href && (
+                    <a
+                      href={p.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 text-[9px] tracking-[0.12em] text-[#3ee0c8] uppercase"
+                    >
+                      {linkLabel(p.href)}
+                    </a>
+                  )}
                 </div>
                 <div className="mt-1 h-0.5 overflow-hidden rounded bg-white/8">
                   <div className="h-full bg-[#d4af7a]" style={{ width: `${p.progress}%` }} />
                 </div>
-              </button>
+              </div>
             ))
           )}
         </Side>
@@ -152,15 +188,24 @@ function Shell() {
             Cognitive load {Math.round(data.cognitiveLoad)}%
           </div>
           {(focusProject || focusAgent) && (
-            <div className="pointer-events-none absolute top-[18%] right-0 left-0 z-10 text-center">
-              <h2 className="font-serif text-[clamp(22px,4vw,40px)] italic [text-shadow:0_0_28px_rgba(212,175,122,.45)]">
+            <div className="absolute top-[16%] right-0 left-0 z-10 text-center">
+              <h2 className="pointer-events-none font-serif text-[clamp(22px,4vw,40px)] italic [text-shadow:0_0_28px_rgba(212,175,122,.45)]">
                 {focusProject?.name ?? focusAgent?.name}
               </h2>
-              <p className="text-[10px] tracking-[0.16em] text-[#9aa3b5] uppercase">
+              <p className="pointer-events-none text-[10px] tracking-[0.16em] text-[#9aa3b5] uppercase">
                 {focusProject
                   ? `Project · ${focusProject.progress}%`
                   : `${focusAgent?.role} · ${Math.round(focusAgent?.load ?? 0)}% load`}
               </p>
+              {focusProject?.href && (
+                <button
+                  type="button"
+                  onClick={() => openHref(focusProject.href)}
+                  className="mt-2 rounded-full border border-[#3ee0c8]/40 bg-[#07060a]/80 px-3 py-1 text-[10px] tracking-[0.16em] text-[#3ee0c8] uppercase"
+                >
+                  Open {linkLabel(focusProject.href)}
+                </button>
+              )}
             </div>
           )}
           <div className="pointer-events-none absolute inset-x-2 bottom-[86px] z-10 flex flex-wrap gap-1.5">
@@ -195,7 +240,7 @@ function Shell() {
             {data.activity.slice(0, 16).map((e) => (
               <div key={e.id} className="py-0.5 text-[11px] text-[#c5ccd8]">
                 <span className="mr-2 text-[10px] text-[#9aa3b5]">{e.time}</span>
-                <b className="font-medium text-[#d4af7a]">{e.tool}</b> {e.message}
+                <b className="font-medium text-[#d4af7a]">{e.tool}</b> <LinkedText text={e.message} />
               </div>
             ))}
           </div>
@@ -236,6 +281,23 @@ function Side({ title, children, grow, wide }: { title: string; children: ReactN
       <div className="mb-2 text-[9px] tracking-[0.2em] text-[#d4af7a] uppercase">{title}</div>
       {children}
     </section>
+  );
+}
+
+function LinkedText({ text }: { text: string }) {
+  const parts = text.split(/(https?:\/\/[^\s]+)/g);
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.startsWith("http") ? (
+          <a key={`${part}-${i}`} href={part} target="_blank" rel="noopener noreferrer" className="text-[#3ee0c8] underline-offset-2 hover:underline">
+            {part.replace(/^https?:\/\//, "").slice(0, 36)}
+          </a>
+        ) : (
+          <span key={`${part}-${i}`}>{part}</span>
+        ),
+      )}
+    </>
   );
 }
 

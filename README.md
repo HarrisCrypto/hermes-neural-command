@@ -12,7 +12,7 @@ GitHub Pages (same file as `standalone/index.html` / `docs/index.html`):
 2. Talk. The core should bloom with your voice.
 3. Release to send. Jarvis answers out loud.
 4. Drag the brain. Tap a glowing project nodule — synapses fire, and that work spins to the front. Ask Jarvis about a project by name and the same nodule comes forward.
-5. **Uplink** once if her tunnel URL changed.
+5. **Uplink** once if her tunnel URL changed. Under Destinations, paste the PURR YouTube URL and Sam’s site. After that, tap **Open** (or say “open PURR”) and the glass sends you there.
 
 Safari needs HTTPS for the microphone. Pages is HTTPS. `http://127.0.0.1` on the phone will not work.
 

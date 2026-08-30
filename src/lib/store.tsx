@@ -20,8 +20,13 @@ import {
 } from "@/lib/client-feed";
 import { defaultHermesOrigin, isHttpOrigin } from "@/lib/protocol";
 import { createInitialData, nextActivity, tickData } from "@/lib/simulation";
+import { mergeBoard, openHref, writeDestination } from "@/lib/board";
 import { uid } from "@/lib/format";
 import type { FeedKind, HermesData, TranscriptLine, ViewId } from "@/lib/types";
+
+function stampBoard(data: HermesData): HermesData {
+  return { ...data, projects: mergeBoard(data.projects) };
+}
 
 type Store = {
   data: HermesData;
@@ -45,6 +50,7 @@ type Store = {
   heardDraft: string;
   transcript: TranscriptLine[];
   sendCommand: (text: string) => void;
+  setProjectHref: (id: string, url: string) => void;
   fps: number;
   setFps: (n: number) => void;
   booted: boolean;
@@ -61,7 +67,7 @@ type Store = {
 const HermesContext = createContext<Store | null>(null);
 
 export function HermesProvider({ children }: { children: React.ReactNode }) {
-  const [data, setData] = useState<HermesData>(() => createInitialData());
+  const [data, setData] = useState<HermesData>(() => stampBoard(createInitialData()));
   const [view, setView] = useState<ViewId>("brain");
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [focusAgentId, setFocusAgentId] = useState<string | null>(null);
@@ -120,10 +126,18 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
   }, [boosted]);
 
   const applyLive = useCallback((next: HermesData, kind: FeedKind) => {
-    setData(next);
+    setData(stampBoard(next));
     setFeedKind(kind);
     setFeedError(null);
     setPulse((n) => n + 1);
+  }, []);
+
+  const setProjectHref = useCallback((id: string, url: string) => {
+    writeDestination(id, url);
+    setData((current) => stampBoard({
+      ...current,
+      projects: current.projects.map((p) => (p.id === id ? { ...p, href: url.trim() } : p)),
+    }));
   }, []);
 
   const setFeedOrigin = useCallback((origin: string) => {
@@ -199,6 +213,7 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
         if (action.focusAgentId !== undefined) setFocusAgentId(action.focusAgentId);
         if (action.boost !== undefined) setBoosted(action.boost);
         if (action.voice !== undefined) setVoiceEnabled(action.voice);
+        if (action.openUrl) openHref(action.openUrl);
         setTranscript((prev) => [
           ...prev,
           { id: uid("j"), role: "jarvis", text: action.reply, at: Date.now() },
@@ -331,6 +346,7 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
       heardDraft,
       transcript,
       sendCommand,
+      setProjectHref,
       fps,
       setFps,
       booted,
@@ -360,6 +376,7 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
       heardDraft,
       transcript,
       sendCommand,
+      setProjectHref,
       fps,
       booted,
       startedAt,

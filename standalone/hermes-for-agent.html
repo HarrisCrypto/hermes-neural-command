@@ -66,10 +66,12 @@
     .binf { position: absolute; left: 8px; right: 8px; bottom: 86px; display: flex; gap: 5px; flex-wrap: wrap; pointer-events: none; z-index: 5; }
     .mini { padding: 3px 7px; border-radius: 6px; font-size: 10px; background: rgba(7,6,10,.75); border: 1px solid var(--line); color: #c9d0dc; }
     .mini b { color: var(--teal); font-weight: 500; }
-    .focus-title { position: absolute; top: 18%; left: 50%; transform: translateX(-50%); text-align: center; width: 90%; pointer-events: none; opacity: 0; z-index: 4; transition: opacity .3s; }
+    .focus-title { position: absolute; top: 16%; left: 50%; transform: translateX(-50%); text-align: center; width: 90%; pointer-events: none; opacity: 0; z-index: 4; transition: opacity .3s; }
     .focus-title.show { opacity: 1; }
     .focus-title h2 { font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 500; font-size: clamp(22px, 4vw, 40px); text-shadow: 0 0 28px rgba(212,175,122,.45); }
     .focus-title p { margin-top: 4px; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); }
+    .go { pointer-events: auto; display: inline-block; margin-top: 8px; border: 1px solid rgba(62,224,200,.4); background: rgba(7,6,10,.8); color: var(--teal); border-radius: 999px; padding: 4px 12px; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; text-decoration: none; }
+    .tile-go { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); text-decoration: none; flex-shrink: 0; }
     .dock {
       position: absolute; left: 0; right: 0; bottom: 0; z-index: 6;
       display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -153,6 +155,9 @@
       <div class="uplink" id="uplink">
         <div class="k">Agent origin</div>
         <input id="origin" spellcheck="false" placeholder="https://your-tunnel.trycloudflare.com" />
+        <div class="k" style="margin-top:10px">Destinations</div>
+        <p class="empty">Paste the YouTube channel and Sam’s site once. Clicks open them.</p>
+        <div id="destinations"></div>
       </div>
     </header>
 
@@ -170,6 +175,7 @@
         <div class="focus-title" id="focusTitle">
           <h2 id="focusName">Neural core</h2>
           <p id="focusMeta">Tap a glowing project · ask Jarvis by name</p>
+          <a class="go" id="focusOpen" hidden href="#" target="_blank" rel="noopener">Open</a>
         </div>
         <div class="binf">
           <span class="mini">Nodes <b id="miniNodes">—</b></span>
@@ -267,14 +273,34 @@
     const state = { origin: origin(), live: false, dash: null, projects: [], voice: 0, held: false, focus: null, spinning: 0, synCount: 0, spark: [], fps: 0, frames: 0, lastFps: performance.now() };
     const web = { nodes: [], pairs: [], lastSig: "" };
 
+    const DEST_KEY = "hermes.destinations";
     const HOUSE = [
-      { id: "purr", name: "PURR therapy", category: "Therapy", description: "The PURR therapy programme — sessions, notes, and follow-through.", progress: 68 },
-      { id: "pipeline", name: "Content pipeline", category: "Media", description: "The content line: ideas through edit and publish.", progress: 54 },
-      { id: "hermes", name: "Hermes", category: "Agent", description: "Hermes herself — the agent that runs this house.", progress: 81 },
-      { id: "dashboard", name: "Dashboard", category: "Command", description: "This command glass. The neural HUD for the live work.", progress: 73 },
-      { id: "sams", name: "Sam's window washing", category: "Business", description: "Sam's window washing — jobs, clients, and the site.", progress: 47 },
+      { id: "purr", name: "PURR therapy", category: "Therapy", description: "The PURR therapy programme — sessions, notes, and the channel.", progress: 68, href: "" },
+      { id: "pipeline", name: "Content pipeline", category: "Media", description: "The content line: ideas through edit and publish.", progress: 54, href: "" },
+      { id: "hermes", name: "Hermes", category: "Agent", description: "Hermes herself — the agent that runs this house.", progress: 81, href: "" },
+      { id: "dashboard", name: "Dashboard", category: "Command", description: "This command glass. The neural HUD for the live work.", progress: 73, href: "https://harriscrypto.github.io/hermes-neural-command/" },
+      { id: "sams", name: "Sam's window washing", category: "Business", description: "Sam's window washing — jobs, clients, and the site.", progress: 47, href: "" },
     ];
     const INVENTED = /^(atlas|atlas reasoner|hermes nds|hermes neural core|iris perception stack|mnemosyne vault|hephaestus forge|argus watchnet)$/i;
+    const HIDDEN = /slime/i;
+    function readDest() {
+      try { return JSON.parse(localStorage.getItem(DEST_KEY) || "{}"); } catch { return {}; }
+    }
+    function writeDest(id, url) {
+      const d = readDest();
+      if (url) d[id] = url; else delete d[id];
+      localStorage.setItem(DEST_KEY, JSON.stringify(d));
+    }
+    function openHref(url) {
+      if (!url || !/^https?:\/\//i.test(url)) return false;
+      window.open(url, "_blank", "noopener,noreferrer");
+      return true;
+    }
+    function linkLabel(url) {
+      if (!url) return "Open";
+      if (/youtube\.com|youtu\.be/i.test(url)) return "YouTube";
+      try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return "Open"; }
+    }
     function keyName(value) {
       return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     }
@@ -283,19 +309,22 @@
       const byName = new Map(house.map((p) => [keyName(p.name), p]));
       (live || []).forEach((p) => {
         const name = p.name || p.title;
-        if (!name || INVENTED.test(keyName(name))) return;
+        if (!name || INVENTED.test(keyName(name)) || HIDDEN.test(name)) return;
         const key = keyName(name);
         const hit = byName.get(key);
         if (hit) {
           if (p.description) hit.description = p.description;
           if (p.progress != null) hit.progress = pct(p.progress);
           if (p.category) hit.category = p.category;
+          if (p.href || (p.links && p.links[0] && p.links[0].url)) hit.href = p.href || p.links[0].url;
         } else {
-          const next = { id: p.id || key, name, category: p.category || "Programme", description: p.description || "", progress: pct(p.progress ?? 0) };
+          const next = { id: p.id || key, name, category: p.category || "Programme", description: p.description || "", progress: pct(p.progress ?? 0), href: p.href || (p.links && p.links[0] && p.links[0].url) || "" };
           house.push(next);
           byName.set(key, next);
         }
       });
+      const dest = readDest();
+      house.forEach((p) => { if (dest[p.id]) p.href = dest[p.id]; });
       return house;
     }
 
@@ -347,6 +376,7 @@
           load: num01(p.progress),
           kind: "project",
           detail: p.description || p.category,
+          href: p.href || "",
         }));
       if (fromWork.length) return fromWork.slice(0, 10);
       return sessionsOf(d).slice(0, 8).map((s) => ({
@@ -373,6 +403,18 @@
       const s = q.toLowerCase();
       const c = catalog();
 
+      if (/open|launch|take me to|go to|visit/.test(s)) {
+        const target = c.projects.find((p) => includesName(s, p.name));
+        if (target && target.href) {
+          pinNode({ id: String(target.id), label: target.name, load: num01(target.progress), kind: "project", detail: target.description, href: target.href });
+          openHref(target.href);
+          return "Opening " + target.name + ".";
+        }
+        if (target) {
+          pinNode({ id: String(target.id), label: target.name, load: num01(target.progress), kind: "project", detail: target.description, href: target.href });
+          return target.name + " is on the board, but I do not have a destination yet. Open Uplink and paste the YouTube or site URL under Destinations.";
+        }
+      }
       if (/help|what can you|what do you know/.test(s)) {
         const names = c.projects.slice(0, 5).map((p) => p.name).join(", ") || "whatever is on the live feed";
         return `Ask me about status, usage, spend, tools, sessions, or a programme by name. I can see ${names}.`;
@@ -384,8 +426,8 @@
         const extra = related
           ? ` Bound session “${related.title || related.project}” — ${compact(related.tool_calls)} tools, ${money(related.cost)}.`
           : "";
-        pinNode({ id: String(proj.id), label: proj.name, load: num01(proj.progress), kind: "project", detail: proj.description });
-        return `Bringing ${proj.name} to the front. ${proj.progress}% along in ${proj.category}. ${proj.description || "No brief on file."}${extra}`;
+        pinNode({ id: String(proj.id), label: proj.name, load: num01(proj.progress), kind: "project", detail: proj.description, href: proj.href });
+        return `Bringing ${proj.name} to the front. ${proj.progress}% along in ${proj.category}. ${proj.description || "No brief on file."}${extra}${proj.href ? " Tap Open to go there." : ""}`;
       }
 
       const sess = c.sessions.find((x) => includesName(s, x.title || "") || includesName(s, x.project || "") || includesName(s, x.model || ""));
@@ -467,6 +509,17 @@
       $("focusName").textContent = n.label;
       $("focusMeta").textContent = (n.kind === "project" ? "Project" : n.kind || "node") + " · " + Math.round((n.load || 0) * 100) + "%";
       $("focusTitle").classList.add("show");
+      const open = $("focusOpen");
+      if (open) {
+        if (n.href) {
+          open.hidden = false;
+          open.href = n.href;
+          open.textContent = "Open " + linkLabel(n.href);
+        } else {
+          open.hidden = true;
+          open.removeAttribute("href");
+        }
+      }
     }
 
     function setLive(on, via) {
@@ -538,13 +591,31 @@
       }).join("") || `<div class="empty">Waiting for cortical feed.</div>`;
 
       $("projects").innerHTML = c.projects.length
-        ? c.projects.slice(0, 6).map((p) => (
-          `<button type="button" class="tile" data-ask="tell me about ${esc(p.name)}">
-            <div class="tile-top"><span class="tile-name">${esc(p.name)}</span><span class="tile-num">${p.progress}</span></div>
+        ? c.projects.slice(0, 8).map((p) => (
+          `<div class="tile">
+            <div class="tile-top">
+              <button type="button" class="ghost" data-ask="tell me about ${esc(p.name)}" style="flex:1;text-align:left;letter-spacing:0;text-transform:none;font-size:12px">${esc(p.name)}</button>
+              <span class="tile-num">${p.progress}%</span>
+              ${p.href ? `<a class="tile-go" href="${esc(p.href)}" target="_blank" rel="noopener">${esc(linkLabel(p.href))}</a>` : ""}
+            </div>
             <div class="bar"><i style="width:${p.progress}%"></i></div>
-          </button>`
+          </div>`
         )).join("")
         : `<div class="empty">No programmes yet.</div>`;
+      const destBox = $("destinations");
+      if (destBox && !destBox.dataset.ready) {
+        destBox.dataset.ready = "1";
+        destBox.innerHTML = HOUSE.map((p) => (
+          `<div class="k" style="margin-top:8px">${esc(p.name)}</div><input data-dest="${esc(p.id)}" spellcheck="false" placeholder="https://" value="${esc((readDest()[p.id] || p.href || ""))}" />`
+        )).join("");
+        destBox.querySelectorAll("[data-dest]").forEach((input) => {
+          input.onchange = () => {
+            writeDest(input.getAttribute("data-dest"), input.value.trim());
+            paint();
+            placeNodes();
+          };
+        });
+      }
 
       $("sessionsList").innerHTML = c.sessions.length
         ? c.sessions.slice(0, 8).map((s) => {
@@ -807,8 +878,12 @@
       if (hits.length) {
         const data = nodeDataFrom(hits[0].object);
         if (data) {
-          pinNode(data);
-          speakLine(reply("tell me about " + data.label));
+          if (state.focus && state.focus.id === data.id && data.href) {
+            openHref(data.href);
+          } else {
+            pinNode(data);
+            speakLine(reply("tell me about " + data.label));
+          }
         }
       }
     });

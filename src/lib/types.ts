@@ -106,4 +106,5 @@ export type JarvisAction = {
   voice?: boolean;
   connectOrigin?: string;
   disconnect?: boolean;
+  openUrl?: string;
 };
