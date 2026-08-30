@@ -41,12 +41,12 @@ const shellFragment = /* glsl */ `
     float fresnel = pow(1.0 - abs(dot(n, vd)), 2.6);
     float scan = sin(vWorld.y * 16.0 - uTime * 3.2) * 0.5 + 0.5;
     float hex = sin(vWorld.x * 13.0 + uTime * 0.4) * sin(vWorld.z * 13.0);
-    vec3 cyan = vec3(0.0, 0.94, 1.0);
-    vec3 purple = vec3(0.66, 0.33, 0.97);
-    vec3 pink = vec3(0.93, 0.28, 0.61);
-    vec3 col = mix(cyan, purple, fresnel);
-    col = mix(col, pink, scan * 0.28);
-    col += cyan * max(hex, 0.0) * 0.12;
+    vec3 gold = vec3(0.83, 0.69, 0.48);
+    vec3 teal = vec3(0.24, 0.88, 0.78);
+    vec3 ice = vec3(0.91, 0.93, 0.97);
+    vec3 col = mix(gold, ice, fresnel);
+    col = mix(col, teal, scan * 0.28);
+    col += gold * max(hex, 0.0) * 0.12;
     col += vec3(0.15, 0.45, 0.7) * abs(vDisp) * 8.0;
     float alpha = 0.07 + fresnel * 0.78 * uIntensity + scan * 0.07;
     gl_FragColor = vec4(col, alpha);
@@ -75,8 +75,8 @@ const coreFragment = /* glsl */ `
   void main() {
     float f = pow(1.0 - abs(dot(normalize(vN), vec3(0.0, 0.0, 1.0))), 2.0);
     float pulse = 0.55 + 0.45 * sin(uTime * 2.4);
-    vec3 col = mix(vec3(0.05, 0.55, 0.85), vec3(0.85, 0.95, 1.0), f * pulse);
-    col = mix(col, vec3(0.7, 0.3, 1.0), 0.25 * uIntensity);
+    vec3 col = mix(vec3(0.45, 0.32, 0.16), vec3(0.95, 0.9, 0.78), f * pulse);
+    col = mix(col, vec3(0.24, 0.88, 0.78), 0.22 * uIntensity);
     gl_FragColor = vec4(col, 0.18 + f * 0.45 * uIntensity);
   }
 `;
@@ -127,7 +127,7 @@ export function Core({ intensity }: { intensity: number }) {
     <group>
       <mesh ref={heart}>
         <sphereGeometry args={[0.42, 32, 32]} />
-        <meshBasicMaterial color="#d8fbff" transparent opacity={0.85} />
+        <meshBasicMaterial color="#d4af7a" transparent opacity={0.9} />
       </mesh>
       <Sphere args={[0.72, 48, 48]}>
         <shaderMaterial
@@ -154,7 +154,7 @@ export function Core({ intensity }: { intensity: number }) {
       </Icosahedron>
       <Icosahedron args={[2.12, 1]}>
         <meshBasicMaterial
-          color="#00f0ff"
+          color="#e8eef8"
           wireframe
           transparent
           opacity={0.16}

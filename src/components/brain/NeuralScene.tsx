@@ -32,10 +32,10 @@ function Lights({ intensity }: { intensity: number }) {
   });
   return (
     <>
-      <ambientLight intensity={0.22} color="#123046" />
-      <pointLight ref={a} color="#00f0ff" distance={28} />
-      <pointLight ref={b} color="#a855f7" distance={26} />
-      <pointLight ref={c} color="#ec4899" distance={22} />
+      <ambientLight intensity={0.28} color="#b8c4d8" />
+      <pointLight ref={a} color="#d4af7a" distance={28} />
+      <pointLight ref={b} color="#3ee0c8" distance={26} />
+      <pointLight ref={c} color="#e8eef8" distance={22} />
     </>
   );
 }
@@ -83,9 +83,26 @@ function CameraRig() {
 }
 
 export function NeuralScene() {
-  const { data, thinking, boosted, pulse, focusAgentId, hoverAgentId, setHoverAgentId, setFocusAgentId, selectSession } =
-    useHermes();
-  const intensity = 0.35 + (data.cognitiveLoad / 100) * 0.55 + (thinking ? 0.22 : 0) + (boosted ? 0.12 : 0);
+  const {
+    data,
+    thinking,
+    boosted,
+    pulse,
+    focusAgentId,
+    hoverAgentId,
+    setHoverAgentId,
+    setFocusAgentId,
+    selectSession,
+    listening,
+    voiceLevel,
+  } = useHermes();
+  const intensity =
+    0.35 +
+    (data.cognitiveLoad / 100) * 0.55 +
+    (thinking ? 0.22 : 0) +
+    (boosted ? 0.12 : 0) +
+    (listening ? 0.28 : 0) +
+    voiceLevel * 0.85;
   const group = useRef<THREE.Group>(null);
 
   useFrame(({ clock }) => {
@@ -97,8 +114,8 @@ export function NeuralScene() {
 
   return (
     <>
-      <color attach="background" args={["#020308"]} />
-      <fog attach="fog" args={["#020308", 10, 26]} />
+      <color attach="background" args={["#07060a"]} />
+      <fog attach="fog" args={["#07060a", 10, 26]} />
       <Lights intensity={intensity} />
       <group ref={group}>
         <Core intensity={intensity} />
@@ -119,7 +136,7 @@ export function NeuralScene() {
           selectSession(session?.id ?? null);
         }}
       />
-      <Sparkles count={90} scale={7} size={2.2} speed={0.35} opacity={0.55} color="#7ef6ff" />
+      <Sparkles count={120} scale={7} size={2.4} speed={listening ? 0.9 : 0.35} opacity={0.6} color="#d4af7a" />
       <Stars radius={48} depth={28} count={1400} factor={3.2} saturation={0} fade speed={0.55} />
       <OrbitControls
         enablePan={false}
@@ -127,14 +144,19 @@ export function NeuralScene() {
         dampingFactor={0.06}
         minDistance={3.4}
         maxDistance={14}
-        autoRotate={!focusAgentId}
-        autoRotateSpeed={thinking ? 1.1 : 0.35}
+        autoRotate={!focusAgentId && !listening}
+        autoRotateSpeed={listening ? 1.6 : thinking ? 1.1 : 0.35}
       />
       <CameraRig />
       <FpsProbe />
       <EffectComposer enableNormalPass={false}>
-        <Bloom intensity={thinking ? 1.55 : 1.15} luminanceThreshold={0.18} luminanceSmoothing={0.3} mipmapBlur />
-        <Vignette eskil={false} offset={0.25} darkness={0.72} />
+        <Bloom
+          intensity={listening ? 1.85 : thinking ? 1.45 : 1.05}
+          luminanceThreshold={0.16}
+          luminanceSmoothing={0.32}
+          mipmapBlur
+        />
+        <Vignette eskil={false} offset={0.22} darkness={0.78} />
       </EffectComposer>
     </>
   );

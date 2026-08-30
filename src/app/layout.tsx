@@ -1,38 +1,30 @@
 import type { Metadata } from "next";
-import { Orbitron, Rajdhani, Share_Tech_Mono } from "next/font/google";
+import { Cormorant_Garamond, Outfit } from "next/font/google";
 import "./globals.css";
 
-const orbitron = Orbitron({
-  variable: "--font-orbitron",
+const serif = Cormorant_Garamond({
+  variable: "--font-serif",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["500", "600"],
+  style: ["normal", "italic"],
 });
 
-const rajdhani = Rajdhani({
-  variable: "--font-rajdhani",
+const sans = Outfit({
+  variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const share = Share_Tech_Mono({
-  variable: "--font-share",
-  subsets: ["latin"],
-  weight: "400",
+  weight: ["300", "400", "500", "600"],
 });
 
 export const metadata: Metadata = {
-  title: "HERMES — Neural Command Center",
+  title: "HERMES — Neural Command",
   description:
-    "Fully functional Jarvis-class neural command dashboard with a live holographic brain, agent constellation, and voice-ready cognitive layer.",
+    "A cinematic Jarvis command room for Hermes: hold-to-speak, a live holographic brain, and an agent uplink.",
   icons: { icon: "/icon.svg" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${orbitron.variable} ${rajdhani.variable} ${share.variable} dark h-full antialiased`}
-    >
+    <html lang="en" className={`${serif.variable} ${sans.variable} dark h-full antialiased`}>
       <body className="min-h-full">{children}</body>
     </html>
   );

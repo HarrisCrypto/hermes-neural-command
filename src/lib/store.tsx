@@ -38,7 +38,11 @@ type Store = {
   voiceEnabled: boolean;
   setVoiceEnabled: (v: boolean) => void;
   listening: boolean;
+  voiceLevel: number;
+  startListen: () => void;
+  stopListen: () => void;
   toggleListen: () => void;
+  heardDraft: string;
   transcript: TranscriptLine[];
   sendCommand: (text: string) => void;
   fps: number;
@@ -66,6 +70,8 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
   const [boosted, setBoosted] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [listening, setListening] = useState(false);
+  const [voiceLevel, setVoiceLevel] = useState(0);
+  const [heardDraft, setHeardDraft] = useState("");
   const [transcript, setTranscript] = useState<TranscriptLine[]>([]);
   const [fps, setFps] = useState(60);
   const [booted, setBooted] = useState(false);
@@ -75,6 +81,14 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
   const feedOrigin = useSyncExternalStore(subscribeOrigin, readOriginSnapshot, defaultHermesOrigin);
   const [feedError, setFeedError] = useState<string | null>(null);
   const recRef = useRef<SpeechRecognitionLite | null>(null);
+  const draftRef = useRef("");
+  const listenRef = useRef(false);
+  const audioRef = useRef<{
+    ctx: AudioContext;
+    analyser: AnalyserNode;
+    stream: MediaStream;
+    raf: number;
+  } | null>(null);
   const voiceRef = useRef(voiceEnabled);
   const thinkingRef = useRef(thinking);
   const boostedRef = useRef(boosted);
@@ -197,35 +211,98 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
     }, 420 + Math.random() * 380);
   }, [setFeedOrigin]);
 
-  const toggleListen = useCallback(() => {
-    const Ctor =
-      typeof window !== "undefined"
-        ? (window.SpeechRecognition || window.webkitSpeechRecognition)
-        : undefined;
-    if (!Ctor) {
-      sendCommand("voice recognition is unavailable on this browser");
+  const stopMic = useCallback(() => {
+    const pack = audioRef.current;
+    if (!pack) return;
+    cancelAnimationFrame(pack.raf);
+    pack.stream.getTracks().forEach((t) => t.stop());
+    void pack.ctx.close();
+    audioRef.current = null;
+    setVoiceLevel(0);
+  }, []);
+
+  const sampleMic = useCallback(() => {
+    const pack = audioRef.current;
+    if (!pack || !listenRef.current) {
+      setVoiceLevel((n) => n * 0.85);
       return;
     }
-    if (listening && recRef.current) {
-      recRef.current.stop();
-      setListening(false);
-      return;
+    const buf = new Uint8Array(pack.analyser.frequencyBinCount);
+    pack.analyser.getByteTimeDomainData(buf);
+    let sum = 0;
+    for (let i = 0; i < buf.length; i++) {
+      const n = (buf[i] - 128) / 128;
+      sum += n * n;
     }
-    const rec = new Ctor();
-    rec.continuous = false;
-    rec.interimResults = false;
-    rec.lang = "en-US";
-    rec.onresult = (event: SpeechRecognitionEventLite) => {
-      const said = event.results[0]?.[0]?.transcript;
-      if (said) sendCommand(said);
-    };
-    rec.onend = () => setListening(false);
-    rec.onerror = () => setListening(false);
-    recRef.current = rec;
-    rec.start();
+    const rms = Math.sqrt(sum / buf.length);
+    setVoiceLevel((prev) => Math.min(1, prev * 0.5 + rms * 4.4));
+    pack.raf = requestAnimationFrame(sampleMic);
+  }, []);
+
+  const startListen = useCallback(async () => {
+    if (listenRef.current) return;
+    listenRef.current = true;
+    draftRef.current = "";
+    setHeardDraft("");
     setListening(true);
     setVoiceEnabled(true);
-  }, [listening, sendCommand]);
+    setVoiceLevel(0.4);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      const ctx = new AudioContext();
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 256;
+      ctx.createMediaStreamSource(stream).connect(analyser);
+      audioRef.current = { ctx, analyser, stream, raf: 0 };
+      if (ctx.state === "suspended") await ctx.resume();
+      sampleMic();
+    } catch {
+      setVoiceLevel(0.45);
+    }
+    const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Ctor) return;
+    const rec = new Ctor();
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.lang = "en-US";
+    rec.onresult = (event: SpeechRecognitionEventLite) => {
+      let said = "";
+      for (let i = 0; i < event.results.length; i++) {
+        said += event.results[i]?.[0]?.transcript ?? "";
+      }
+      draftRef.current = said.trim();
+      setHeardDraft(draftRef.current);
+    };
+    rec.onerror = () => {};
+    recRef.current = rec;
+    try {
+      rec.start();
+    } catch {
+      /* already started */
+    }
+  }, [sampleMic]);
+
+  const stopListen = useCallback(() => {
+    if (!listenRef.current) return;
+    listenRef.current = false;
+    setListening(false);
+    try {
+      recRef.current?.stop();
+    } catch {
+      /* ignore */
+    }
+    recRef.current = null;
+    stopMic();
+    const said = draftRef.current.trim();
+    draftRef.current = "";
+    setHeardDraft("");
+    if (said) sendCommand(said);
+  }, [sendCommand, stopMic]);
+
+  const toggleListen = useCallback(() => {
+    if (listenRef.current) stopListen();
+    else void startListen();
+  }, [startListen, stopListen]);
 
   const value = useMemo<Store>(
     () => ({
@@ -243,7 +320,11 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
       voiceEnabled,
       setVoiceEnabled,
       listening,
+      voiceLevel,
+      startListen,
+      stopListen,
       toggleListen,
+      heardDraft,
       transcript,
       sendCommand,
       fps,
@@ -268,7 +349,11 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
       boosted,
       voiceEnabled,
       listening,
+      voiceLevel,
+      startListen,
+      stopListen,
       toggleListen,
+      heardDraft,
       transcript,
       sendCommand,
       fps,
