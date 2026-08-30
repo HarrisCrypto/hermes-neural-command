@@ -11,9 +11,10 @@ import { SessionsView } from "@/components/dashboard/SessionsView";
 import { LogsView } from "@/components/dashboard/LogsView";
 import { JarvisConsole } from "@/components/dashboard/JarvisConsole";
 import { BootSequence } from "@/components/dashboard/BootSequence";
+import { FeedBar } from "@/components/dashboard/FeedBar";
 
 function Shell() {
-  const { booted, view, fps, startedAt, data } = useHermes();
+  const { booted, view, fps, startedAt, data, feedKind, feedLive } = useHermes();
   const [uptime, setUptime] = useState("0h 0m 0s");
 
   useEffect(() => {
@@ -35,13 +36,15 @@ function Shell() {
         {view === "sessions" && <SessionsView />}
         {view === "logs" && <LogsView />}
         <JarvisConsole />
+        <FeedBar />
       </main>
       <footer className="md:col-span-2 flex items-center justify-between rounded-lg border border-cyan-400/10 bg-[#060c1c]/60 px-3 py-1.5 font-mono text-[8px] text-white/30">
         <div>
           HERMES · NDS v15 · Uptime {uptime} · {data.agents.filter((a) => a.status !== "standby").length} agents live
         </div>
         <div>
-          <span className="text-cyan-300">{fps}</span> FPS · Data: <span className="text-cyan-300">Live mesh</span>
+          <span className="text-cyan-300">{fps}</span> FPS · Data:{" "}
+          <span className="text-cyan-300">{feedLive ? feedKind : "Local mesh"}</span>
         </div>
       </footer>
     </div>

@@ -1,12 +1,16 @@
 import { fmt, fmtCost } from "@/lib/format";
-import type { HermesData, JarvisAction } from "@/lib/types";
+import type { FeedKind, HermesData, JarvisAction } from "@/lib/types";
 
 function sitrep(data: HermesData) {
   const active = data.agents.filter((a) => a.status === "thinking" || a.status === "active").length;
   return `All systems nominal. Cognitive load is ${Math.round(data.cognitiveLoad)} percent. ${active} agents are in motion, ${fmt(data.totals.calls)} tool calls logged, spend at ${fmtCost(data.totals.cost)}. Neural core is stable.`;
 }
 
-export function interpretCommand(raw: string, data: HermesData): JarvisAction {
+export function interpretCommand(
+  raw: string,
+  data: HermesData,
+  feed?: { kind: FeedKind; origin: string; live: boolean },
+): JarvisAction {
   const q = raw.trim();
   if (!q) return { reply: "Standing by, sir." };
   const s = q.toLowerCase();
@@ -14,7 +18,7 @@ export function interpretCommand(raw: string, data: HermesData): JarvisAction {
   if (/\b(help|commands|what can you)\b/.test(s)) {
     return {
       reply:
-        "You can ask for a status report, system vitals, cognitive load, sessions, or projects. Say focus and an agent name to lock the core. Boost or standby changes throughput. Mute and speak control my voice.",
+        "You can ask for a status report, system vitals, cognitive load, sessions, or projects. Say focus and an agent name to lock the core. Boost or standby changes throughput. Mute and speak control my voice. Say connect and a URL to lock onto your Hermes agent slime feed.",
     };
   }
 
@@ -60,7 +64,31 @@ export function interpretCommand(raw: string, data: HermesData): JarvisAction {
     };
   }
 
-  if (/\b(log|activity|feed|stream)\b/.test(s)) {
+  if (/\b(connect|uplink)\b/.test(s)) {
+    const url = q.match(/https?:\/\/[^\s]+/i)?.[0];
+    if (url) {
+      return { reply: `Locking the uplink onto ${url}. I will take slime from your Hermes agent as soon as it answers.`, connectOrigin: url };
+    }
+    return {
+      reply: feed?.live
+        ? `Already on the slime uplink via ${feed.kind} at ${feed.origin}.`
+        : `No origin in that command. Paste the agent URL — connect https://your-tunnel.trycloudflare.com`,
+    };
+  }
+
+  if (/\b(disconnect|drop uplink|local mesh)\b/.test(s)) {
+    return { reply: "Dropping the agent uplink. I will keep the core alive on the local mesh.", disconnect: true };
+  }
+
+  if (/\b(slime|uplink|data source|hermes agent)\b/.test(s)) {
+    return {
+      reply: feed?.live
+        ? `Slime is live over ${feed.kind}. Origin ${feed.origin}. Sessions ${data.totals.sessions}, calls ${fmt(data.totals.calls)}.`
+        : `No slime on the wire. Your Hermes agent should publish /api/dashboard.json and /ws, or POST snapshots to /api/ingest. Currently on the local mesh.`,
+    };
+  }
+
+  if (/\b(log|activity feed|activity stream|stream)\b/.test(s)) {
     const last = data.activity[0];
     return {
       reply: `Activity lattice is open. Last pulse: ${last?.tool ?? "idle"} — ${last?.message ?? "quiet"}.`,

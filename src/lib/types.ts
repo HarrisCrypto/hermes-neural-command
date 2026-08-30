@@ -95,6 +95,8 @@ export type TranscriptLine = {
   at: number;
 };
 
+export type FeedKind = "websocket" | "polling" | "ingest" | "mesh";
+
 export type JarvisAction = {
   reply: string;
   view?: ViewId;
@@ -102,4 +104,6 @@ export type JarvisAction = {
   focusAgentId?: string | null;
   boost?: boolean;
   voice?: boolean;
+  connectOrigin?: string;
+  disconnect?: boolean;
 };

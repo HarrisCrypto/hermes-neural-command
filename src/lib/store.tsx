@@ -8,11 +8,20 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { interpretCommand, speak, stopSpeaking } from "@/lib/jarvis";
+import {
+  openAgentSocket,
+  pullSnapshot,
+  readOriginSnapshot,
+  subscribeOrigin,
+  writeStoredOrigin,
+} from "@/lib/client-feed";
+import { defaultHermesOrigin, isHttpOrigin } from "@/lib/protocol";
 import { createInitialData, nextActivity, tickData } from "@/lib/simulation";
 import { uid } from "@/lib/format";
-import type { HermesData, TranscriptLine, ViewId } from "@/lib/types";
+import type { FeedKind, HermesData, TranscriptLine, ViewId } from "@/lib/types";
 
 type Store = {
   data: HermesData;
@@ -38,6 +47,11 @@ type Store = {
   setBooted: (v: boolean) => void;
   startedAt: number;
   pulse: number;
+  feedKind: FeedKind;
+  feedOrigin: string;
+  setFeedOrigin: (origin: string) => void;
+  feedLive: boolean;
+  feedError: string | null;
 };
 
 const HermesContext = createContext<Store | null>(null);
@@ -57,10 +71,29 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
   const [booted, setBooted] = useState(false);
   const [pulse, setPulse] = useState(0);
   const [startedAt] = useState(() => Date.now());
+  const [feedKind, setFeedKind] = useState<FeedKind>("mesh");
+  const feedOrigin = useSyncExternalStore(subscribeOrigin, readOriginSnapshot, defaultHermesOrigin);
+  const [feedError, setFeedError] = useState<string | null>(null);
   const recRef = useRef<SpeechRecognitionLite | null>(null);
   const voiceRef = useRef(voiceEnabled);
   const thinkingRef = useRef(thinking);
   const boostedRef = useRef(boosted);
+  const dataRef = useRef(data);
+  const liveRef = useRef(false);
+  const originRef = useRef(feedOrigin);
+  const feedKindRef = useRef(feedKind);
+  const feedLive = feedKind !== "mesh";
+
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
+  useEffect(() => {
+    originRef.current = feedOrigin;
+  }, [feedOrigin]);
+  useEffect(() => {
+    feedKindRef.current = feedKind;
+    liveRef.current = feedKind !== "mesh";
+  }, [feedKind]);
 
   useEffect(() => {
     voiceRef.current = voiceEnabled;
@@ -72,11 +105,52 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
     boostedRef.current = boosted;
   }, [boosted]);
 
+  const applyLive = useCallback((next: HermesData, kind: FeedKind) => {
+    setData(next);
+    setFeedKind(kind);
+    setFeedError(null);
+    setPulse((n) => n + 1);
+  }, []);
+
+  const setFeedOrigin = useCallback((origin: string) => {
+    const cleaned = origin.trim().replace(/\/$/, "");
+    if (cleaned && !isHttpOrigin(cleaned)) {
+      setFeedError("Origin must be http(s)");
+      return;
+    }
+    writeStoredOrigin(cleaned);
+    setFeedKind("mesh");
+    setFeedError(null);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const snap = await pullSnapshot(originRef.current, dataRef.current);
+        if (cancelled || !snap) return;
+        applyLive(snap.data, snap.kind);
+      } catch (err) {
+        if (!cancelled) setFeedError(err instanceof Error ? err.message : "uplink failed");
+      }
+    };
+    void poll();
+    const id = window.setInterval(poll, 4000);
+    const stopWs = openAgentSocket(feedOrigin, (next, kind) => applyLive(next, kind), () => dataRef.current);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+      stopWs();
+    };
+  }, [applyLive, feedOrigin]);
+
   useEffect(() => {
     const tick = window.setInterval(() => {
+      if (liveRef.current) return;
       setData((prev) => tickData(prev, thinkingRef.current, boostedRef.current));
     }, 900);
     const act = window.setInterval(() => {
+      if (liveRef.current) return;
       setData((prev) => ({
         ...prev,
         activity: [nextActivity(), ...prev.activity].slice(0, 80),
@@ -99,7 +173,13 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
     setPulse((n) => n + 1);
     window.setTimeout(() => {
       setData((current) => {
-        const action = interpretCommand(cleaned, current);
+        const action = interpretCommand(cleaned, current, {
+          kind: feedKindRef.current,
+          origin: originRef.current,
+          live: liveRef.current,
+        });
+        if (action.connectOrigin) setFeedOrigin(action.connectOrigin);
+        if (action.disconnect) setFeedOrigin("");
         if (action.view) setView(action.view);
         if (action.selectSessionId) setSelectedSessionId(action.selectSessionId);
         if (action.focusAgentId !== undefined) setFocusAgentId(action.focusAgentId);
@@ -115,7 +195,7 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
       });
       setThinking(false);
     }, 420 + Math.random() * 380);
-  }, []);
+  }, [setFeedOrigin]);
 
   const toggleListen = useCallback(() => {
     const Ctor =
@@ -172,6 +252,11 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
       setBooted,
       startedAt,
       pulse,
+      feedKind,
+      feedOrigin,
+      setFeedOrigin,
+      feedLive,
+      feedError,
     }),
     [
       data,
@@ -190,6 +275,11 @@ export function HermesProvider({ children }: { children: React.ReactNode }) {
       booted,
       startedAt,
       pulse,
+      feedKind,
+      feedOrigin,
+      setFeedOrigin,
+      feedLive,
+      feedError,
     ],
   );
 
