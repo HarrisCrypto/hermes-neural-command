@@ -12,7 +12,7 @@ const KEYS: Array<keyof BrainActivity> = [
   "proactive",
 ];
 const LABELS = ["Reason", "Tools", "Memory", "Output", "Reflect", "Proact"];
-const COLORS = ["#00f0ff", "#a855f7", "#ec4899", "#22d3ee", "#fbbf24", "#34d399"];
+const COLORS = ["#d4af7a", "#3ee0c8", "#e8eef8", "#c9a66b", "#7ec8b8", "#9aa3b5"];
 const SHORT = ["R", "T", "M", "O", "R", "P"];
 
 export function Gauges({ brain }: { brain: BrainActivity }) {
@@ -79,7 +79,7 @@ export function RadarChart({ brain }: { brain: BrainActivity }) {
     const r = Math.min(w, h) / 2 - 16;
     if (r < 15) return;
     ctx.clearRect(0, 0, w, h);
-    ctx.strokeStyle = "rgba(0,240,255,0.07)";
+    ctx.strokeStyle = "rgba(212,175,122,0.1)";
     for (let ring = 1; ring <= 4; ring++) {
       ctx.beginPath();
       KEYS.forEach((_, i) => {
@@ -101,11 +101,11 @@ export function RadarChart({ brain }: { brain: BrainActivity }) {
       else ctx.lineTo(x, y);
     });
     ctx.closePath();
-    ctx.fillStyle = "rgba(0,240,255,0.1)";
+    ctx.fillStyle = "rgba(212,175,122,0.12)";
     ctx.fill();
-    ctx.strokeStyle = "#00f0ff";
+    ctx.strokeStyle = "#d4af7a";
     ctx.lineWidth = 1.2;
-    ctx.shadowColor = "#00f0ff";
+    ctx.shadowColor = "#d4af7a";
     ctx.shadowBlur = 5;
     ctx.stroke();
     ctx.shadowBlur = 0;
@@ -115,7 +115,7 @@ export function RadarChart({ brain }: { brain: BrainActivity }) {
       const y = cy + Math.sin(ang) * r * Math.min(1, brain[key]);
       ctx.beginPath();
       ctx.arc(x, y, 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = "#00f0ff";
+      ctx.fillStyle = "#d4af7a";
       ctx.fill();
     });
     ctx.fillStyle = "rgba(255,255,255,0.35)";
@@ -156,14 +156,14 @@ export function LineChart({ series }: { series: number[] }) {
     ctx.lineTo(w, h);
     ctx.closePath();
     const grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, "rgba(0,240,255,0.18)");
-    grad.addColorStop(1, "rgba(0,240,255,0)");
+    grad.addColorStop(0, "rgba(212,175,122,0.22)");
+    grad.addColorStop(1, "rgba(212,175,122,0)");
     ctx.fillStyle = grad;
     ctx.fill();
     ctx.beginPath();
-    ctx.strokeStyle = "#00f0ff";
+    ctx.strokeStyle = "#d4af7a";
     ctx.lineWidth = 1.2;
-    ctx.shadowColor = "#00f0ff";
+    ctx.shadowColor = "#d4af7a";
     ctx.shadowBlur = 6;
     series.forEach((v, i) => {
       const x = (w * i) / (series.length - 1);
@@ -176,7 +176,7 @@ export function LineChart({ series }: { series: number[] }) {
     const last = series[series.length - 1];
     ctx.beginPath();
     ctx.arc(w, h - (last / 100) * h, 2.6, 0, Math.PI * 2);
-    ctx.fillStyle = "#00f0ff";
+    ctx.fillStyle = "#d4af7a";
     ctx.shadowBlur = 5;
     ctx.fill();
   }, [series]);

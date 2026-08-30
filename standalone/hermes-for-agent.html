@@ -9,279 +9,202 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #07060a;
-      --gold: #d4af7a;
-      --ice: #e8eef8;
-      --teal: #3ee0c8;
-      --ink: #9aa3b5;
-      --glass: rgba(12, 11, 16, 0.62);
-      --line: rgba(232, 238, 248, 0.08);
+      --bg: #07060a; --gold: #d4af7a; --ice: #e8eef8; --teal: #3ee0c8;
+      --ink: #9aa3b5; --glass: rgba(12,11,16,.72); --line: rgba(232,238,248,.08);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { background: var(--bg); color: var(--ice); }
+    html, body { height: 100%; background: var(--bg); color: var(--ice); }
     body {
       font-family: Outfit, system-ui, sans-serif;
       -webkit-font-smoothing: antialiased;
-      min-height: 100%;
       background:
-        radial-gradient(ellipse 80% 50% at 10% -10%, rgba(212,175,122,.14), transparent 50%),
-        radial-gradient(ellipse 70% 40% at 100% 20%, rgba(62,224,200,.07), transparent 46%),
-        radial-gradient(ellipse 60% 30% at 50% 100%, rgba(212,175,122,.05), transparent 50%),
+        radial-gradient(ellipse 90% 60% at 12% 0%, rgba(212,175,122,.12), transparent 46%),
+        radial-gradient(ellipse 70% 50% at 100% 80%, rgba(62,224,200,.06), transparent 50%),
         var(--bg);
     }
-    header {
-      position: sticky; top: 0; z-index: 12;
-      padding: max(12px, env(safe-area-inset-top)) 0 0;
-      background: rgba(7,6,10,.72);
-      backdrop-filter: blur(22px);
-      border-bottom: 1px solid var(--line);
+    .app {
+      display: grid;
+      grid-template-columns: minmax(190px, 230px) 1fr;
+      grid-template-rows: auto 1fr;
+      gap: 8px;
+      padding: 8px;
+      min-height: 100vh;
+      min-height: 100dvh;
     }
-    .head-inner, .wrap { width: min(1180px, 100%); margin: 0 auto; padding-left: 16px; padding-right: 16px; }
-    .head-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 10px; }
-    .wordmark { font-family: "Cormorant Garamond", serif; font-size: 20px; letter-spacing: .28em; }
-    .wordmark span { color: var(--gold); }
-    .live { display: flex; align-items: center; gap: 8px; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink); }
-    .dot { width: 7px; height: 7px; border-radius: 50%; background: #c45a4a; box-shadow: 0 0 10px #c45a4a; }
-    .dot.on { background: var(--teal); box-shadow: 0 0 12px var(--teal); }
-    .ghost { background: none; border: 0; color: var(--ink); font: inherit; letter-spacing: .16em; text-transform: uppercase; font-size: 10px; cursor: pointer; }
-    .jump { display: flex; gap: 18px; overflow-x: auto; padding: 0 16px 10px; width: min(1180px, 100%); margin: 0 auto; }
-    .jump a { color: var(--ink); text-decoration: none; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; }
-    .jump a:hover { color: var(--gold); }
-
-    .wrap { padding-top: 18px; padding-bottom: 40px; }
-    .rail {
-      display: grid; grid-template-columns: repeat(2, 1fr);
-      border: 1px solid rgba(212,175,122,.18);
-      border-radius: 20px;
-      background: linear-gradient(180deg, rgba(212,175,122,.07), rgba(10,10,14,.35));
-      overflow: hidden;
-      margin-bottom: 18px;
-    }
-    @media (min-width: 800px) { .rail { grid-template-columns: repeat(5, 1fr); } }
-    .stat { padding: 14px 16px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-    .stat:nth-child(2n) { border-right: 0; }
-    @media (min-width: 800px) {
-      .stat { border-bottom: 0; }
-      .stat:nth-child(2n) { border-right: 1px solid var(--line); }
-      .stat:last-child { border-right: 0; }
-    }
-    .k { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink); }
-    .v { font-family: "Cormorant Garamond", serif; font-size: 28px; line-height: 1.05; margin-top: 6px; }
-    .muted { color: var(--ink); }
-    .card {
-      position: relative;
+    .header { grid-column: 1 / -1; }
+    .card, .header, .panel {
       background: var(--glass);
       border: 1px solid var(--line);
-      backdrop-filter: blur(20px);
-      border-radius: 22px;
-      padding: 18px 18px 16px;
+      border-radius: 14px;
+      backdrop-filter: blur(16px);
       box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
     }
-    .card::before {
-      content: "";
-      position: absolute; top: 0; left: 18%; right: 18%; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(212,175,122,.45), transparent);
-    }
-    .sec-h {
-      display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
-      margin-bottom: 14px; padding-bottom: 10px;
-      border-bottom: 1px solid var(--line);
-    }
-    .sec-h h3 { font-family: "Cormorant Garamond", serif; font-size: 26px; font-weight: 500; letter-spacing: .02em; }
-    .sec-h .idx { color: var(--gold); font-size: 11px; letter-spacing: .22em; }
-    .grid2 { display: grid; gap: 14px; margin-top: 16px; }
-    @media (min-width: 900px) { .grid2 { grid-template-columns: 1.15fr .85fr; } }
-    .grid-vitals { display: grid; gap: 14px; margin-top: 14px; }
-    @media (min-width: 900px) { .grid-vitals { grid-template-columns: 1fr 1fr; } }
-
-    .hero {
-      position: relative;
-      border-radius: 26px;
-      overflow: hidden;
-      border: 1px solid rgba(212,175,122,.16);
-      background: #050408;
-      box-shadow: 0 30px 80px rgba(0,0,0,.35);
-    }
-    #stage { height: min(56vh, 500px); min-height: 270px; }
+    .header { padding: 8px 12px; }
+    .hc { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .wordmark { font-family: "Cormorant Garamond", serif; font-size: 18px; letter-spacing: .26em; }
+    .wordmark span { color: var(--gold); }
+    .live { display: flex; align-items: center; gap: 7px; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink); }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #c45a4a; box-shadow: 0 0 10px #c45a4a; }
+    .dot.on { background: var(--teal); box-shadow: 0 0 12px var(--teal); }
+    .ghost { background: none; border: 0; color: var(--ink); font: inherit; letter-spacing: .14em; text-transform: uppercase; font-size: 10px; cursor: pointer; }
+    .hs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .st { min-width: 58px; text-align: center; padding: 4px 8px; border-radius: 8px; background: rgba(212,175,122,.05); border: 1px solid rgba(212,175,122,.14); }
+    .sv { font-family: "Cormorant Garamond", serif; font-size: 16px; color: var(--gold); line-height: 1.1; }
+    .sl { font-size: 8px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); }
+    .sidebar { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+    .panel { padding: 10px; overflow: auto; }
+    .pt { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+    .center { display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; }
+    .hero { position: relative; flex: 1; min-height: 300px; overflow: hidden; background: #050408; }
+    #stage { position: absolute; inset: 0; }
     #stage canvas { display: block; width: 100%; height: 100%; }
-    .focus-title {
-      position: absolute; top: 12%; left: 50%; transform: translateX(-50%);
-      text-align: center; pointer-events: none; opacity: 0; transition: opacity .3s;
-      width: 90%;
-    }
+    .ov { position: absolute; top: 8px; left: 8px; right: 8px; display: flex; justify-content: space-between; pointer-events: none; z-index: 5; }
+    .bb { padding: 3px 8px; border-radius: 6px; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; background: rgba(7,6,10,.75); border: 1px solid var(--line); color: var(--gold); }
+    .cog { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 5; pointer-events: none;
+      padding: 4px 12px; border-radius: 99px; font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+      background: rgba(7,6,10,.8); border: 1px solid rgba(212,175,122,.35); color: var(--gold); }
+    .binf { position: absolute; left: 8px; right: 8px; bottom: 86px; display: flex; gap: 5px; flex-wrap: wrap; pointer-events: none; z-index: 5; }
+    .mini { padding: 3px 7px; border-radius: 6px; font-size: 10px; background: rgba(7,6,10,.75); border: 1px solid var(--line); color: #c9d0dc; }
+    .mini b { color: var(--teal); font-weight: 500; }
+    .focus-title { position: absolute; top: 18%; left: 50%; transform: translateX(-50%); text-align: center; width: 90%; pointer-events: none; opacity: 0; z-index: 4; transition: opacity .3s; }
     .focus-title.show { opacity: 1; }
-    .focus-title h2 { font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 500; font-size: clamp(26px, 6vw, 46px); }
-    .focus-title p { margin-top: 4px; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink); }
-
-    .dock { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 14px 18px; background: linear-gradient(180deg, transparent, rgba(7,6,10,.55)); }
-    .heard {
-      min-height: 44px; text-align: center; padding: 0 8px;
-      font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 18px; color: var(--gold);
+    .focus-title h2 { font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 500; font-size: clamp(22px, 4vw, 40px); }
+    .focus-title p { margin-top: 4px; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); }
+    .dock {
+      position: absolute; left: 0; right: 0; bottom: 0; z-index: 6;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 6px 8px 8px;
+      background: linear-gradient(180deg, transparent, rgba(7,6,10,.78));
     }
+    .heard { min-height: 20px; text-align: center; font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 15px; color: var(--gold); padding: 0 8px; }
     .speak {
-      appearance: none; border: 0; cursor: pointer;
-      width: min(92vw, 420px); height: 68px; border-radius: 999px;
+      appearance: none; border: 0; cursor: pointer; height: 48px; width: min(92%, 380px); border-radius: 999px;
       background: linear-gradient(180deg, rgba(232,238,248,.1), rgba(10,10,14,.55));
       border: 1px solid rgba(212,175,122,.35); color: var(--ice);
-      display: flex; align-items: center; justify-content: center; gap: 12px;
-      box-shadow: 0 16px 40px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.08);
+      display: flex; align-items: center; justify-content: center; gap: 10px;
     }
-    .speak.held { border-color: var(--teal); box-shadow: 0 0 0 8px rgba(62,224,200,.08); }
-    .orb { width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, var(--gold) 45%, #8a6a3a); box-shadow: 0 0 14px var(--gold); }
-    .speak.held .orb { background: radial-gradient(circle at 35% 30%, #fff, var(--teal) 50%, #14685c); box-shadow: 0 0 18px var(--teal); }
-    .speak strong { font-size: 12px; letter-spacing: .26em; font-weight: 500; }
-    .hint { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink); text-align: center; }
-    .chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-    .chip {
-      border: 1px solid rgba(212,175,122,.2); background: rgba(255,255,255,.03);
-      color: var(--ice); border-radius: 999px; padding: 7px 13px; font-size: 11px; letter-spacing: .08em;
-    }
-    .ask { width: 100%; max-width: 420px; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ice); font: inherit; text-align: center; padding: 8px 0; outline: none; }
-
-    .uplink { display: none; margin: 0 0 14px; }
+    .speak.held { border-color: var(--teal); box-shadow: 0 0 0 6px rgba(62,224,200,.08); }
+    .orb { width: 12px; height: 12px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, var(--gold) 45%, #8a6a3a); box-shadow: 0 0 10px var(--gold); }
+    .speak.held .orb { background: radial-gradient(circle at 35% 30%, #fff, var(--teal) 50%, #14685c); }
+    .speak strong { font-size: 11px; letter-spacing: .22em; font-weight: 500; }
+    .hint { font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink); }
+    .panel-zone { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .jarvis { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; }
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .chip { border: 1px solid rgba(212,175,122,.2); background: rgba(255,255,255,.03); color: var(--ice); border-radius: 999px; padding: 5px 10px; font-size: 10px; letter-spacing: .06em; }
+    .ask { flex: 1; min-width: 140px; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ice); font: inherit; padding: 6px 0; outline: none; }
+    .uplink { display: none; padding: 8px 10px; }
     .uplink.open { display: block; }
-    .uplink input { width: 100%; margin-top: 8px; background: transparent; border: 0; border-bottom: 1px solid var(--line); color: var(--ice); font: inherit; padding: 8px 0; outline: none; }
-
-    .tile {
-      width: 100%; text-align: left; background: none; border: 0; color: inherit;
-      padding: 12px 0; border-bottom: 1px solid var(--line); cursor: pointer;
-    }
-    .tile:last-child { border-bottom: 0; padding-bottom: 2px; }
-    .tile-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
-    .tile-name { font-size: 15px; letter-spacing: .01em; }
-    .tile-num { font-family: "Cormorant Garamond", serif; font-size: 28px; color: var(--gold); line-height: 1; }
-    .tile p { margin-top: 4px; font-size: 12px; color: var(--ink); line-height: 1.45; }
-    .bar { height: 2px; background: rgba(255,255,255,.08); border-radius: 99px; overflow: hidden; margin-top: 10px; }
+    .uplink input { width: 100%; margin-top: 6px; background: transparent; border: 0; border-bottom: 1px solid var(--line); color: var(--ice); font: inherit; padding: 6px 0; outline: none; }
+    .tile { width: 100%; text-align: left; background: none; border: 0; color: inherit; padding: 6px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+    .tile:last-child { border-bottom: 0; }
+    .tile-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .tile-name { font-size: 12px; }
+    .tile-num { font-family: "Cormorant Garamond", serif; color: var(--gold); font-size: 16px; }
+    .tile p { margin-top: 2px; font-size: 10px; color: var(--ink); }
+    .bar { height: 2px; background: rgba(255,255,255,.08); border-radius: 99px; overflow: hidden; margin-top: 6px; }
     .bar > i { display: block; height: 100%; background: linear-gradient(90deg, #8a6a3a, var(--gold)); }
     .bar.teal > i { background: linear-gradient(90deg, #14685c, var(--teal)); }
-    .pill { font-size: 9px; letter-spacing: .16em; text-transform: uppercase; padding: 3px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--ink); }
-    .pill.live { color: var(--teal); border-color: rgba(62,224,200,.35); background: rgba(62,224,200,.08); }
-
-    .gauges { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .gauge {
-      padding: 12px;
-      border-radius: 16px;
-      background: rgba(255,255,255,.025);
-      border: 1px solid var(--line);
-    }
-    .gauge .v { font-size: 22px; }
-
-    .log { max-height: 320px; overflow: auto; padding-left: 14px; border-left: 1px solid rgba(212,175,122,.28); }
-    .log div { position: relative; padding: 0 0 14px 8px; font-size: 13px; line-height: 1.45; color: #c5ccd8; }
-    .log div::before {
-      content: ""; position: absolute; left: -18px; top: 7px; width: 7px; height: 7px; border-radius: 50%;
-      background: var(--gold); box-shadow: 0 0 8px var(--gold);
-    }
+    .pill { font-size: 8px; letter-spacing: .14em; text-transform: uppercase; padding: 2px 6px; border-radius: 99px; border: 1px solid var(--line); color: var(--ink); }
+    .pill.live { color: var(--teal); border-color: rgba(62,224,200,.35); }
+    .muted { color: var(--ink); }
+    .k { font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); }
+    .sysrow { display: flex; justify-content: space-between; font-size: 11px; margin-top: 6px; }
+    .rings { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+    .ring { text-align: center; width: 56px; }
+    .ring svg { width: 52px; height: 52px; }
+    .ring span { display: block; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); margin-top: -2px; }
+    .log { max-height: 120px; overflow: auto; font-size: 11px; line-height: 1.4; color: #c5ccd8; }
     .log b { color: var(--gold); font-weight: 500; }
-    .empty { padding: 18px 4px; color: var(--ink); font-size: 13px; font-family: "Cormorant Garamond", serif; font-style: italic; }
-
-    .boot {
-      position: fixed; inset: 0; z-index: 30; background: #07060a;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
-      transition: opacity .6s ease;
-    }
+    .empty { color: var(--ink); font-size: 11px; font-style: italic; font-family: "Cormorant Garamond", serif; padding: 6px 0; }
+    .boot { position: fixed; inset: 0; z-index: 30; background: #07060a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; transition: opacity .6s; }
     .boot.hide { opacity: 0; pointer-events: none; }
     .boot h1 { font-family: "Cormorant Garamond", serif; letter-spacing: .4em; font-weight: 500; font-size: 28px; }
     .boot p { letter-spacing: .26em; text-transform: uppercase; font-size: 11px; color: var(--ink); }
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: grid; grid-template-columns: 1fr 1fr; }
+      .sidebar .panel:last-child { grid-column: 1 / -1; }
+      .panel-zone { grid-template-columns: 1fr; }
+      .hero { min-height: 360px; }
+      body, html { height: auto; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div class="head-inner">
-      <div class="wordmark">HERMES <span>NDS</span></div>
-      <div style="display:flex;align-items:center;gap:14px">
-        <button class="ghost" id="uplinkBtn" type="button">Uplink</button>
-        <div class="live"><i class="dot" id="liveDot"></i><span id="liveLbl">Local mesh</span></div>
+  <div class="app">
+    <header class="header">
+      <div class="hc">
+        <div>
+          <div class="wordmark">HERMES <span>NDS</span></div>
+          <div class="live" style="margin-top:4px"><i class="dot" id="liveDot"></i><span id="liveLbl">Local mesh</span>
+            <button class="ghost" id="uplinkBtn" type="button">Uplink</button>
+          </div>
+        </div>
+        <div class="hs">
+          <div class="st"><div class="sv" id="statSessions">—</div><div class="sl">Sessions</div></div>
+          <div class="st"><div class="sv" id="statCalls">—</div><div class="sl">Calls</div></div>
+          <div class="st"><div class="sv" id="statTokens">—</div><div class="sl">Tokens</div></div>
+          <div class="st"><div class="sv" id="statCost">—</div><div class="sl">Spend</div></div>
+          <div class="st"><div class="sv" id="statMsgs">—</div><div class="sl">Messages</div></div>
+          <div class="st"><div class="sv" id="statLoad">—</div><div class="sl">Load</div></div>
+        </div>
       </div>
-    </div>
-    <nav class="jump">
-      <a href="#jarvis">Core</a>
-      <a href="#board">Board</a>
-      <a href="#sessions">Sessions</a>
-      <a href="#vitals">Vitals</a>
-      <a href="#stream">Stream</a>
-    </nav>
-  </header>
-
-  <div class="wrap">
-    <div class="uplink card" id="uplink">
-      <div class="k">Agent origin</div>
-      <input id="origin" spellcheck="false" placeholder="https://your-tunnel.trycloudflare.com" />
-      <div class="hint" style="margin-top:8px">Saved on this device. Used when the page is not on her tunnel.</div>
-    </div>
-
-    <div class="rail">
-      <div class="stat"><div class="k">Sessions</div><div class="v" id="statSessions">—</div></div>
-      <div class="stat"><div class="k">Tool calls</div><div class="v" id="statCalls">—</div></div>
-      <div class="stat"><div class="k">Tokens</div><div class="v" id="statTokens">—</div></div>
-      <div class="stat"><div class="k">Spend</div><div class="v" id="statCost">—</div></div>
-      <div class="stat"><div class="k">Load</div><div class="v" id="statLoad">—</div></div>
-    </div>
-
-    <section class="hero" id="jarvis">
-      <div id="stage"></div>
-      <div class="focus-title" id="focusTitle">
-        <h2 id="focusName">Neural core</h2>
-        <p id="focusMeta">Drag · tap a node · hold to speak</p>
+      <div class="uplink" id="uplink">
+        <div class="k">Agent origin</div>
+        <input id="origin" spellcheck="false" placeholder="https://your-tunnel.trycloudflare.com" />
       </div>
-      <div class="dock">
-        <div class="heard" id="heard">Ask about a project, session, or usage.</div>
-        <button class="speak" id="speak" type="button">
-          <span class="orb"></span>
-          <strong id="speakLbl">HOLD TO SPEAK</strong>
-        </button>
-        <div class="hint" id="statusHint">Press and hold · release to send</div>
+    </header>
+
+    <aside class="sidebar">
+      <div class="panel"><div class="pt">Programmes</div><div id="projects"></div></div>
+      <div class="panel" style="flex:1"><div class="pt">Sessions</div><div id="sessionsList"></div></div>
+      <div class="panel"><div class="pt">Tools</div><div id="tools"></div></div>
+    </aside>
+
+    <main class="center">
+      <section class="hero card">
+        <div id="stage"></div>
+        <div class="ov"><span class="bb">Neural core · v15</span><span class="bb" id="fps">— FPS</span></div>
+        <div class="cog" id="cogLoad">Cognitive load —</div>
+        <div class="focus-title" id="focusTitle">
+          <h2 id="focusName">Neural core</h2>
+          <p id="focusMeta">Drag · tap a node · hold to speak</p>
+        </div>
+        <div class="binf">
+          <span class="mini">Nodes <b id="miniNodes">—</b></span>
+          <span class="mini">Agents <b id="miniAgents">—</b></span>
+          <span class="mini">Synapses <b id="miniSyn">—</b></span>
+          <span class="mini">CPU <b id="miniCpu">—</b></span>
+          <span class="mini">Mem <b id="miniMem">—</b></span>
+        </div>
+        <div class="dock">
+          <div class="heard" id="heard">Ask about a project, session, or usage.</div>
+          <button class="speak" id="speak" type="button"><span class="orb"></span><strong id="speakLbl">HOLD TO SPEAK</strong></button>
+          <div class="hint" id="statusHint">Hold · release to send</div>
+        </div>
+      </section>
+
+      <div class="panel-zone">
+        <div class="panel"><div class="pt">Cortical activity</div><div class="rings" id="gauges"></div></div>
+        <div class="panel"><div class="pt">Throughput</div><canvas id="spark" height="110" style="width:100%;height:110px;display:block"></canvas></div>
+        <div class="panel"><div class="pt">System</div><div id="system"></div></div>
+      </div>
+
+      <div class="panel"><div class="pt">Activity stream</div><div class="log" id="log"></div></div>
+
+      <div class="jarvis card">
         <div class="chips">
           <button class="chip" data-cmd="status">Status</button>
           <button class="chip" data-cmd="what are we working on">Projects</button>
           <button class="chip" data-cmd="usage">Usage</button>
           <button class="chip" data-cmd="last activity">Activity</button>
         </div>
-        <form id="askForm" style="width:100%;display:flex;justify-content:center">
-          <input class="ask" id="ask" placeholder="Or type a question…" autocomplete="off" />
+        <form id="askForm" style="flex:1;display:flex">
+          <input class="ask" id="ask" placeholder="Ask Jarvis about the live board…" autocomplete="off" />
         </form>
       </div>
-    </section>
-
-    <div class="grid2">
-      <article class="card" id="board">
-        <div class="sec-h">
-          <h3>The board</h3>
-          <span class="idx" id="projCount">01</span>
-        </div>
-        <div id="projects"></div>
-      </article>
-      <article class="card" id="sessions">
-        <div class="sec-h">
-          <h3>Sessions</h3>
-          <span class="idx" id="sessCount">02</span>
-        </div>
-        <div id="sessionsList"></div>
-      </article>
-    </div>
-    <div class="grid-vitals" id="vitals">
-      <article class="card">
-        <div class="sec-h">
-          <h3>Tools</h3>
-          <span class="idx">03</span>
-        </div>
-        <div id="tools"></div>
-      </article>
-      <article class="card">
-        <div class="sec-h">
-          <h3>Vitals</h3>
-          <span class="idx">04</span>
-        </div>
-        <div class="gauges" id="system"></div>
-      </article>
-    </div>
-    <article class="card" id="stream" style="margin-top:14px">
-      <div class="sec-h">
-        <h3>The stream</h3>
-        <span class="idx">05</span>
-      </div>
-      <div class="log" id="log"></div>
-    </article>
+    </main>
   </div>
 
   <div class="boot" id="boot">
@@ -340,7 +263,7 @@
       return n.split(" ").filter((w) => w.length > 3).some((w) => q.includes(w));
     }
 
-    const state = { origin: origin(), live: false, dash: null, projects: [], voice: 0, held: false, focus: null };
+    const state = { origin: origin(), live: false, dash: null, projects: [], voice: 0, held: false, focus: null, spark: [], fps: 0, frames: 0, lastFps: performance.now() };
 
     const mock = {
       totals: { sessions: 12, tool_calls: 48, tokens: 182000, total_cost: 4.12, messages: 390 },
@@ -537,39 +460,86 @@
       $("liveLbl").textContent = via;
     }
 
+    function regions(d) {
+      const ba = d.brain_activity;
+      const keys = ["reasoning", "tool_use", "memory", "output", "reflection", "proactive"];
+      if (ba && !Array.isArray(ba) && typeof ba === "object") {
+        return keys.map((k) => ({ id: k, label: k.replace(/_/g, " "), v: num01(ba[k] ?? 0) }));
+      }
+      return brainNodes(d).slice(0, 6).map((n) => ({ id: n.id, label: n.label, v: n.load }));
+    }
+    function drawSpark() {
+      const c = $("spark");
+      if (!c) return;
+      const w = c.parentElement ? c.parentElement.clientWidth : 240;
+      c.width = Math.max(120, w); c.height = 110;
+      const ctx = c.getContext("2d");
+      const series = state.spark.length > 1 ? state.spark : [40, 46, 42, 55, 48, 60];
+      ctx.clearRect(0, 0, c.width, c.height);
+      ctx.beginPath(); ctx.moveTo(0, c.height);
+      series.forEach((v, i) => {
+        ctx.lineTo((c.width * i) / (series.length - 1), c.height - (Math.min(100, v) / 100) * c.height);
+      });
+      ctx.lineTo(c.width, c.height); ctx.closePath();
+      const g = ctx.createLinearGradient(0, 0, 0, c.height);
+      g.addColorStop(0, "rgba(212,175,122,.28)"); g.addColorStop(1, "rgba(212,175,122,0)");
+      ctx.fillStyle = g; ctx.fill();
+      ctx.beginPath();
+      series.forEach((v, i) => {
+        const x = (c.width * i) / (series.length - 1);
+        const y = c.height - (Math.min(100, v) / 100) * c.height;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = "#d4af7a"; ctx.lineWidth = 1.4; ctx.stroke();
+    }
     function paint() {
       const c = catalog();
       $("statSessions").textContent = compact(c.totals.sessions);
       $("statCalls").textContent = compact(c.totals.calls);
       $("statTokens").textContent = compact(c.totals.tokens);
       $("statCost").textContent = money(c.totals.cost);
+      $("statMsgs").textContent = compact(c.totals.messages);
       $("statLoad").textContent = c.load + "%";
+      $("cogLoad").textContent = "Cognitive load " + c.load + "%";
+      $("miniNodes").textContent = String(c.sessions.length);
+      $("miniAgents").textContent = String(c.nodes.length || c.sessions.length);
+      $("miniSyn").textContent = compact(c.totals.calls);
+      const sy = c.d.system || {};
+      $("miniCpu").textContent = pct(sy.cpu) + "%";
+      $("miniMem").textContent = (sy.memory_used != null ? Number(sy.memory_used).toFixed(0) : "—") + "/" + (sy.memory_total_gb || sy.memory || "—");
 
-      $("projCount").textContent = String(c.projects.length).padStart(2, "0");
-      $("sessCount").textContent = String(c.sessions.length).padStart(2, "0");
+      state.spark.push(c.load || 40);
+      if (state.spark.length > 36) state.spark.shift();
+      drawSpark();
+
+      const circ = 2 * Math.PI * 18;
+      $("gauges").innerHTML = regions(c.d).map((r) => {
+        const off = circ * (1 - r.v);
+        return `<div class="ring"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="4"/>
+          <circle cx="24" cy="24" r="18" fill="none" stroke="#d4af7a" stroke-width="4" stroke-linecap="round"
+            stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 24 24)"/>
+          <text x="24" y="27" text-anchor="middle" fill="#d4af7a" font-size="9">${Math.round(r.v * 100)}</text></svg>
+          <span>${esc(r.label.slice(0, 8))}</span></div>`;
+      }).join("") || `<div class="empty">Waiting for cortical feed.</div>`;
 
       $("projects").innerHTML = c.projects.length
-        ? c.projects.map((p) => (
+        ? c.projects.slice(0, 6).map((p) => (
           `<button type="button" class="tile" data-ask="tell me about ${esc(p.name)}">
             <div class="tile-top"><span class="tile-name">${esc(p.name)}</span><span class="tile-num">${p.progress}</span></div>
-            <p>${esc(p.description || p.category)}</p>
             <div class="bar"><i style="width:${p.progress}%"></i></div>
           </button>`
         )).join("")
-        : `<div class="empty">No deliverables on the wire. Named sessions still hold the live work — ask Jarvis about any of them.</div>`;
+        : `<div class="empty">No programmes yet.</div>`;
 
       $("sessionsList").innerHTML = c.sessions.length
-        ? c.sessions.slice(0, 10).map((s) => {
+        ? c.sessions.slice(0, 8).map((s) => {
           const live = s.active !== false && s.status !== "idle";
           return `<button type="button" class="tile" data-ask="tell me about ${esc(s.title || s.project)}">
-            <div class="tile-top">
-              <span class="tile-name">${esc(s.title || s.project)}</span>
-              <span class="pill${live ? " live" : ""}">${live ? "live" : "idle"}</span>
-            </div>
-            <p>${esc(s.model || "core")} · ${compact(s.tool_calls)} tools · ${money(s.cost)}</p>
+            <div class="tile-top"><span class="tile-name">${esc(s.title || s.project)}</span><span class="pill${live ? " live" : ""}">${live ? "live" : "idle"}</span></div>
+            <p>${esc(s.model || "core")} · ${compact(s.tool_calls)} · ${money(s.cost)}</p>
           </button>`;
         }).join("")
-        : `<div class="empty">Waiting for Hermes sessions.</div>`;
+        : `<div class="empty">Waiting for sessions.</div>`;
 
       const maxT = Math.max(...c.tools.map((t) => t.count || 0), 1);
       $("tools").innerHTML = c.tools.length
@@ -579,9 +549,8 @@
             <div class="bar teal"><i style="width:${((t.count || 0) / maxT) * 100}%"></i></div>
           </button>`
         )).join("")
-        : `<div class="empty">No tool histogram yet.</div>`;
+        : `<div class="empty">No tools yet.</div>`;
 
-      const sy = c.d.system || {};
       const mem = sy.memory_used != null ? Number(sy.memory_used).toFixed(1) : "—";
       const memT = sy.memory_total_gb || sy.memory || "—";
       const memP = sy.memory_used != null && sy.memory_total_gb ? (sy.memory_used / sy.memory_total_gb) * 100 : pct(sy.memory);
@@ -589,16 +558,16 @@
         ["CPU", pct(sy.cpu) + "%", pct(sy.cpu)],
         ["Memory", mem + " / " + memT, memP],
         ["Disk", pct(sy.disk_used_pct || sy.disk) + "%", pct(sy.disk_used_pct || sy.disk)],
-        ["Uptime", sy.uptime || "—", 40],
+        ["Network", compact((sy.network_sent_mb || 0) + (sy.network_recv_mb || 0) || sy.network) + " MB", 40],
       ].map(([k, v, p]) => (
-        `<div class="gauge"><div class="k">${k}</div><div class="v">${esc(v)}</div><div class="bar teal"><i style="width:${Math.min(100, p)}%"></i></div></div>`
+        `<div class="sysrow"><span class="k">${k}</span><span>${esc(v)}</span></div><div class="bar teal"><i style="width:${Math.min(100, p)}%"></i></div>`
       )).join("");
 
       $("log").innerHTML = c.log.length
-        ? c.log.slice(0, 24).map((e) => (
+        ? c.log.slice(0, 16).map((e) => (
           `<div><span class="muted">${esc(e.time || "")}</span> <b>${esc(e.who || e.tool || e.tool_name || "Hermes")}</b> ${esc(e.what || e.message || e.text || "")}</div>`
         )).join("")
-        : `<div class="empty">The stream is quiet. When Hermes moves, it writes here.</div>`;
+        : `<div class="empty">Waiting for Hermes…</div>`;
     }
 
     /* ---------------- scene ---------------- */
@@ -742,6 +711,14 @@
         n.mesh.scale.setScalar(state.focus && state.focus.id === n.data.id ? 1.45 : 1);
       });
       renderer.render(scene, camera);
+      state.frames += 1;
+      const now = performance.now();
+      if (now - state.lastFps >= 1000) {
+        state.fps = state.frames;
+        state.frames = 0;
+        state.lastFps = now;
+        if ($("fps")) $("fps").textContent = state.fps + " FPS";
+      }
     }
     tick();
 
