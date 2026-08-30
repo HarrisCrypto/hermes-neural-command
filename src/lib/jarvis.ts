@@ -10,22 +10,24 @@ function sitrep(data: HermesData) {
   return `Live. Cognitive load ${Math.round(data.cognitiveLoad)} percent. ${live} session${live === 1 ? "" : "s"} open, ${fmt(data.totals.calls)} tool calls, spend ${fmtCost(data.totals.cost)}. ${names ? `On the board: ${names}.` : "No named programmes in this feed yet."}`;
 }
 
-function programmes(data: HermesData): Array<{ name: string; detail: string; progress?: number }> {
+function programmes(data: HermesData): Array<{ id: string; name: string; detail: string; progress?: number }> {
   if (data.projects.length) {
     return data.projects.map((p) => ({
+      id: p.id,
       name: p.name,
       detail: `${p.category}. ${p.description} Progress ${p.progress} percent.`,
       progress: p.progress,
     }));
   }
   const seen = new Set<string>();
-  const out: Array<{ name: string; detail: string }> = [];
+  const out: Array<{ id: string; name: string; detail: string }> = [];
   for (const s of data.sessions) {
     const name = s.title;
     const key = name.toLowerCase();
     if (!name || seen.has(key)) continue;
     seen.add(key);
     out.push({
+      id: s.id,
       name,
       detail: `${s.active ? "Live" : "Idle"} session on ${s.model}. ${fmt(s.toolCalls)} tools, ${fmt(s.messages)} messages, ${fmtCost(s.cost)}.`,
     });
@@ -93,23 +95,32 @@ export function interpretCommand(
       ? ` Bound session “${related[0].title}” — ${fmt(related[0].toolCalls)} tools, ${fmtCost(related[0].cost)}.`
       : "";
     return {
-      reply: `${proj.name} is ${proj.progress}% along in ${proj.category}. ${proj.description}${extra}`,
-      view: "projects",
+      reply: `Bringing ${proj.name} to the front. ${proj.progress}% along in ${proj.category}. ${proj.description}${extra}`,
+      view: "brain",
+      focusAgentId: proj.id,
+      selectSessionId: related[0]?.id,
     };
   }
 
   const namedProgramme = board.find((p) => includesName(s, p.name));
   if (namedProgramme && !/\b(status|report|sitrep|overview|how are we)\b/.test(s)) {
-    return { reply: `${namedProgramme.name}. ${namedProgramme.detail}`, view: "projects" };
+    return {
+      reply: `Bringing ${namedProgramme.name} to the front. ${namedProgramme.detail}`,
+      view: "brain",
+      focusAgentId: namedProgramme.id,
+    };
   }
 
   const sess = sessionHit(s, data);
   if (sess && !/\b(all sessions|list sessions)\b/.test(s)) {
+    const bound = data.projects.find(
+      (p) => includesName(sess.title, p.name) || includesName(p.name, sess.title),
+    );
     return {
-      reply: `“${sess.title}” is ${sess.active ? "live" : "idle"} on ${sess.model} via ${sess.source}. ${fmt(sess.toolCalls)} tool calls, ${fmt(sess.messages)} messages, ${fmt(sess.inputTokens + sess.outputTokens)} tokens, ${fmtCost(sess.cost)}.`,
-      view: "sessions",
+      reply: `${bound ? `Bringing ${bound.name} to the front. ` : ""}“${sess.title}” is ${sess.active ? "live" : "idle"} on ${sess.model} via ${sess.source}. ${fmt(sess.toolCalls)} tool calls, ${fmt(sess.messages)} messages, ${fmt(sess.inputTokens + sess.outputTokens)} tokens, ${fmtCost(sess.cost)}.`,
+      view: "brain",
       selectSessionId: sess.id,
-      focusAgentId: sess.agentId,
+      focusAgentId: bound?.id ?? sess.agentId,
     };
   }
 

@@ -11,7 +11,7 @@ GitHub Pages (same file as `standalone/index.html` / `docs/index.html`):
 1. Tap **HOLD TO SPEAK** and keep your finger down.
 2. Talk. The core should bloom with your voice.
 3. Release to send. Jarvis answers out loud.
-4. Drag the brain. Tap a gold or teal node to pin a thread.
+4. Drag the brain. Tap a glowing project nodule — synapses fire, and that work spins to the front. Ask Jarvis about a project by name and the same nodule comes forward.
 5. **Uplink** once if her tunnel URL changed.
 
 Safari needs HTTPS for the microphone. Pages is HTTPS. `http://127.0.0.1` on the phone will not work.

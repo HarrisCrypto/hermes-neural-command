@@ -3,13 +3,15 @@
 import { useRef, type RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import { OrbitControls, Sparkles, Stars } from "@react-three/drei";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { Core } from "@/components/brain/Core";
 import { Neurons, Pulses, Synapses } from "@/components/brain/Neurons";
-import { AgentConstellation } from "@/components/brain/Agents";
+import { ProjectConstellation } from "@/components/brain/Agents";
 import { HudRings, ScanWave } from "@/components/brain/Rings";
 import { useHermes } from "@/lib/store";
+import { workNodes } from "@/lib/work";
 
 function Lights({ intensity }: { intensity: number }) {
   const a = useRef<THREE.PointLight>(null);
@@ -59,21 +61,12 @@ function FpsProbe() {
 function CameraRig({
   controls,
 }: {
-  controls: RefObject<{ target: THREE.Vector3 } | null>;
+  controls: RefObject<OrbitControlsImpl | null>;
 }) {
-  const { focusAgentId, data } = useHermes();
   const goal = useRef(new THREE.Vector3(0, 0, 0));
 
   useFrame(() => {
-    if (focusAgentId) {
-      const idx = data.agents.findIndex((a) => a.id === focusAgentId);
-      if (idx >= 0) {
-        const radius = 3.35 + (idx % 3) * 0.42;
-        goal.current.set(radius * 0.35, 0.2, 0);
-      }
-    } else {
-      goal.current.set(0, 0, 0);
-    }
+    goal.current.set(0, 0.05, 0.35);
     controls.current?.target.lerp(goal.current, 0.05);
   });
   return null;
@@ -90,9 +83,11 @@ export function NeuralScene() {
     setHoverAgentId,
     setFocusAgentId,
     selectSession,
+    sendCommand,
     listening,
     voiceLevel,
   } = useHermes();
+  const nodules = workNodes(data);
   const intensity =
     0.35 +
     (data.cognitiveLoad / 100) * 0.55 +
@@ -101,7 +96,7 @@ export function NeuralScene() {
     (listening ? 0.28 : 0) +
     voiceLevel * 0.85;
   const group = useRef<THREE.Group>(null);
-  const controls = useRef<{ target: THREE.Vector3 } | null>(null);
+  const controls = useRef<OrbitControlsImpl | null>(null);
 
   useFrame(({ clock }) => {
     if (group.current) {
@@ -123,15 +118,20 @@ export function NeuralScene() {
       </group>
       <HudRings />
       <ScanWave pulse={pulse} intensity={intensity} />
-      <AgentConstellation
-        agents={data.agents}
+      <ProjectConstellation
+        projects={nodules}
         focusId={focusAgentId}
         hoverId={hoverAgentId}
+        voiceLevel={voiceLevel}
         onHover={setHoverAgentId}
         onSelect={(id) => {
           setFocusAgentId(id);
-          const session = data.sessions.find((s) => s.agentId === id);
+          const node = nodules.find((p) => p.id === id);
+          const session = data.sessions.find(
+            (s) => s.id === id || s.title === node?.name || s.agentId === id,
+          );
           selectSession(session?.id ?? null);
+          if (node) sendCommand(`tell me about ${node.name}`);
         }}
       />
       <Sparkles count={120} scale={7} size={2.4} speed={listening ? 0.9 : 0.35} opacity={0.6} color="#d4af7a" />

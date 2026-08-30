@@ -2,6 +2,7 @@ import { AGENTS } from "@/lib/simulation";
 import { clamp, uid } from "@/lib/format";
 import type { RawActivity, RawAgent, RawDashboard, RawDeliverables, RawSession } from "@/lib/protocol";
 import type { Agent, AgentStatus, HermesData, Project, Session } from "@/lib/types";
+import { projectsFromSessions } from "@/lib/work";
 
 const PALETTE = ["#00f0ff", "#a855f7", "#ec4899", "#22d3ee", "#fbbf24", "#34d399", "#fb7185", "#38bdf8"];
 
@@ -146,7 +147,11 @@ export function adaptDashboard(raw: RawDashboard, prev?: HermesData, projects?: 
     },
     sessions: sessions.length ? sessions : prev?.sessions ?? [],
     agents: agents.length ? agents : prev?.agents ?? [],
-    projects: projects?.length ? projects : prev?.projects ?? [],
+    projects: projects?.length
+      ? projects
+      : projectsFromSessions(sessions).length
+        ? projectsFromSessions(sessions)
+        : prev?.projects ?? [],
     activity: activity.length ? activity : prev?.activity ?? [],
     tools: (raw.top_tools || []).map((x) => ({
       name: x.name || x.tool_name || "tool",

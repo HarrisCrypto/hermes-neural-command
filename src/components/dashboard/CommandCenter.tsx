@@ -8,6 +8,7 @@ import { JarvisConsole } from "@/components/dashboard/JarvisConsole";
 import { Gauges, LineChart } from "@/components/dashboard/Charts";
 import { fmt, fmtCost } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { workNodes } from "@/lib/work";
 
 const BrainCanvas = dynamic(
   () => import("@/components/brain/BrainCanvas").then((m) => m.BrainCanvas),
@@ -44,7 +45,9 @@ function Shell() {
     sendCommand,
   } = useHermes();
   const [uplinkOpen, setUplinkOpen] = useState(false);
-  const focus = data.agents.find((a) => a.id === focusAgentId);
+  const nodules = workNodes(data);
+  const focusProject = nodules.find((p) => p.id === focusAgentId);
+  const focusAgent = data.agents.find((a) => a.id === focusAgentId);
   const maxTool = Math.max(...data.tools.map((t) => t.count), 1);
 
   if (!booted) return <BootSequence />;
@@ -143,23 +146,27 @@ function Shell() {
           <BrainCanvas />
           <div className="pointer-events-none absolute inset-x-2 top-2 z-10 flex justify-between">
             <Badge>Neural core · v15</Badge>
-            <Badge>{fps} FPS</Badge>
+            <Badge>{`${fps} FPS`}</Badge>
           </div>
           <div className="pointer-events-none absolute top-2 left-1/2 z-10 -translate-x-1/2 rounded-full border border-[#d4af7a]/35 bg-[#07060a]/80 px-3 py-1 text-[9px] tracking-[0.14em] text-[#d4af7a] uppercase">
             Cognitive load {Math.round(data.cognitiveLoad)}%
           </div>
-          {focus && (
+          {(focusProject || focusAgent) && (
             <div className="pointer-events-none absolute top-[18%] right-0 left-0 z-10 text-center">
-              <h2 className="font-serif text-[clamp(22px,4vw,40px)] italic">{focus.name}</h2>
+              <h2 className="font-serif text-[clamp(22px,4vw,40px)] italic [text-shadow:0_0_28px_rgba(212,175,122,.45)]">
+                {focusProject?.name ?? focusAgent?.name}
+              </h2>
               <p className="text-[10px] tracking-[0.16em] text-[#9aa3b5] uppercase">
-                {focus.role} · {Math.round(focus.load)}% load
+                {focusProject
+                  ? `Project · ${focusProject.progress}%`
+                  : `${focusAgent?.role} · ${Math.round(focusAgent?.load ?? 0)}% load`}
               </p>
             </div>
           )}
           <div className="pointer-events-none absolute inset-x-2 bottom-[86px] z-10 flex flex-wrap gap-1.5">
-            <Mini l="Nodes" v={String(data.sessions.length)} />
-            <Mini l="Agents" v={String(data.agents.length)} />
-            <Mini l="Synapses" v={fmt(data.totals.calls)} />
+            <Mini l="Nodes" v={String(nodules.length)} />
+            <Mini l="Projects" v={String(data.projects.length || nodules.length)} />
+            <Mini l="Synapses" v={String(Math.max(0, nodules.length * 3))} />
             <Mini l="CPU" v={`${Math.round(data.system.cpu)}%`} />
             <Mini l="Mem" v={`${data.system.memoryUsed.toFixed(0)}/${data.system.memoryTotal}`} />
           </div>
