@@ -7,6 +7,7 @@ import type {
   Session,
   SystemMetrics,
 } from "@/lib/types";
+import { HOUSE_PROJECTS } from "@/lib/board";
 import { clamp, uid } from "@/lib/format";
 
 const MODELS = [
@@ -57,77 +58,17 @@ export const AGENTS: Agent[] = [
 ];
 
 const SESSION_SEEDS: Array<Pick<Session, "title" | "source" | "agentId">> = [
-  { title: "Overnight market synthesis", source: "cron", agentId: "athena" },
-  { title: "Payments edge code review", source: "studio", agentId: "hephaestus" },
-  { title: "Threat surface scan — east", source: "watch", agentId: "argus" },
-  { title: "Investor brief draft", source: "desk", agentId: "orpheus" },
-  { title: "Memory compaction cycle", source: "core", agentId: "mnemosyne" },
-  { title: "Vision pipeline calibration", source: "lab", agentId: "iris" },
-  { title: "Launch sequence rehearsal", source: "ops", agentId: "daedalus" },
-  { title: "Counterfactual policy sweep", source: "research", agentId: "prometheus" },
-  { title: "Holographic HUD refresh", source: "studio", agentId: "hephaestus" },
-  { title: "Voice lattice retune", source: "core", agentId: "orpheus" },
-  { title: "Satellite downlink decode", source: "watch", agentId: "iris" },
-  { title: "Session 47 continuity lock", source: "core", agentId: "athena" },
+  { title: "PURR therapy notes", source: "studio", agentId: "orpheus" },
+  { title: "Content pipeline batch", source: "studio", agentId: "hephaestus" },
+  { title: "Hermes core", source: "core", agentId: "athena" },
+  { title: "Dashboard glass", source: "studio", agentId: "hephaestus" },
+  { title: "Sam's window washing bookings", source: "desk", agentId: "argus" },
+  { title: "PURR follow-through", source: "studio", agentId: "mnemosyne" },
+  { title: "Pipeline publish pass", source: "ops", agentId: "daedalus" },
+  { title: "Hermes memory", source: "core", agentId: "mnemosyne" },
 ];
 
-export const PROJECTS: Project[] = [
-  {
-    id: "p-hermes",
-    name: "HERMES Neural Core",
-    category: "Command",
-    description: "Live holographic command surface with Jarvis-class cognition and agent constellation.",
-    progress: 92,
-    icon: "◈",
-    href: "/",
-    updated: "live",
-  },
-  {
-    id: "p-atlas",
-    name: "Atlas Reasoner",
-    category: "Cognition",
-    description: "Long-horizon planning mesh that fans work across ATHENA and DAEDALUS.",
-    progress: 74,
-    icon: "△",
-    updated: "12m ago",
-  },
-  {
-    id: "p-iris",
-    name: "IRIS Perception Stack",
-    category: "Vision",
-    description: "Multi-sensor fusion for orbital and ground imagery with holographic replay.",
-    progress: 61,
-    icon: "◎",
-    updated: "28m ago",
-  },
-  {
-    id: "p-vault",
-    name: "Mnemosyne Vault",
-    category: "Memory",
-    description: "Compressed episodic store with synaptic recall under 40ms.",
-    progress: 88,
-    icon: "▣",
-    updated: "6m ago",
-  },
-  {
-    id: "p-forge",
-    name: "Hephaestus Forge",
-    category: "Tools",
-    description: "Autonomous patch, compile, and deploy loop with signed artifacts.",
-    progress: 55,
-    icon: "⚒",
-    updated: "41m ago",
-  },
-  {
-    id: "p-argus",
-    name: "Argus Watchnet",
-    category: "Defense",
-    description: "Always-on anomaly lattice across sessions, cost, and outbound calls.",
-    progress: 80,
-    icon: "◉",
-    updated: "3m ago",
-  },
-];
+export const PROJECTS: Project[] = HOUSE_PROJECTS.map((p) => ({ ...p }));
 
 function seedSessions(): Session[] {
   const now = Date.now();

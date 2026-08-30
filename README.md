@@ -19,7 +19,7 @@ Safari needs HTTPS for the microphone. Pages is HTTPS. `http://127.0.0.1` on the
 ## Talk to Jarvis
 
 - Hold the button, or hold **space** in the Next.js app
-- Chips: `status`, `projects`, `atlas`
+- Chips: `status`, `projects`, `purr`
 - Type a command under the button if you prefer silence
 - `connect https://your-tunnel.trycloudflare.com`
 

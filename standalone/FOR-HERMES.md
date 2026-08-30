@@ -18,4 +18,14 @@ Keep:
 
 If this file is served from your tunnel or localhost, it uses `location.origin`. If it is on Netlify or GitHub Pages, set **Uplink** to your tunnel (or `HERMES_DEFAULT_ORIGIN` in the file).
 
+The nodules on the brain are Jason’s house board, already in the glass:
+
+- PURR therapy
+- Content pipeline
+- Hermes
+- Dashboard
+- Sam's window washing
+
+If you publish `/api/deliverables`, use those same names. Matching programmes overlay progress and copy. Extra programmes are added. Invented stand-ins (Atlas, NDS, myth agents) are ignored.
+
 Point every number on the glass at the live dashboard payload, not at placeholders. The hold-to-speak control and the brain are the product — do not wrap them in a cyan panel grid.

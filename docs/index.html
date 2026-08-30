@@ -197,6 +197,7 @@
         <div class="chips">
           <button class="chip" data-cmd="status">Status</button>
           <button class="chip" data-cmd="what are we working on">Projects</button>
+          <button class="chip" data-cmd="tell me about PURR therapy">PURR</button>
           <button class="chip" data-cmd="usage">Usage</button>
           <button class="chip" data-cmd="last activity">Activity</button>
         </div>
@@ -266,29 +267,57 @@
     const state = { origin: origin(), live: false, dash: null, projects: [], voice: 0, held: false, focus: null, spinning: 0, synCount: 0, spark: [], fps: 0, frames: 0, lastFps: performance.now() };
     const web = { nodes: [], pairs: [], lastSig: "" };
 
+    const HOUSE = [
+      { id: "purr", name: "PURR therapy", category: "Therapy", description: "The PURR therapy programme — sessions, notes, and follow-through.", progress: 68 },
+      { id: "pipeline", name: "Content pipeline", category: "Media", description: "The content line: ideas through edit and publish.", progress: 54 },
+      { id: "hermes", name: "Hermes", category: "Agent", description: "Hermes herself — the agent that runs this house.", progress: 81 },
+      { id: "dashboard", name: "Dashboard", category: "Command", description: "This command glass. The neural HUD for the live work.", progress: 73 },
+      { id: "sams", name: "Sam's window washing", category: "Business", description: "Sam's window washing — jobs, clients, and the site.", progress: 47 },
+    ];
+    const INVENTED = /^(atlas|atlas reasoner|hermes nds|hermes neural core|iris perception stack|mnemosyne vault|hephaestus forge|argus watchnet)$/i;
+    function keyName(value) {
+      return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    }
+    function mergeBoard(live) {
+      const house = HOUSE.map((p) => Object.assign({}, p));
+      const byName = new Map(house.map((p) => [keyName(p.name), p]));
+      (live || []).forEach((p) => {
+        const name = p.name || p.title;
+        if (!name || INVENTED.test(keyName(name))) return;
+        const key = keyName(name);
+        const hit = byName.get(key);
+        if (hit) {
+          if (p.description) hit.description = p.description;
+          if (p.progress != null) hit.progress = pct(p.progress);
+          if (p.category) hit.category = p.category;
+        } else {
+          const next = { id: p.id || key, name, category: p.category || "Programme", description: p.description || "", progress: pct(p.progress ?? 0) };
+          house.push(next);
+          byName.set(key, next);
+        }
+      });
+      return house;
+    }
+
     const mock = {
       totals: { sessions: 12, tool_calls: 48, tokens: 182000, total_cost: 4.12, messages: 390 },
       sessions: [
-        { id: "s1", title: "Atlas briefing", project: "Atlas", status: "active", model: "hermes-core-15", tool_calls: 41, messages: 88, cost: 1.2 },
-        { id: "s2", title: "Command surface", project: "Hermes NDS", status: "active", model: "atlas-reasoner", tool_calls: 22, messages: 54, cost: 0.64 },
+        { id: "s1", title: "PURR therapy notes", project: "PURR therapy", status: "active", model: "hermes-core-15", tool_calls: 41, messages: 88, cost: 1.2 },
+        { id: "s2", title: "Content pipeline batch", project: "Content pipeline", status: "active", model: "hermes-core-15", tool_calls: 22, messages: 54, cost: 0.64 },
+        { id: "s3", title: "Hermes core", project: "Hermes", status: "active", model: "hermes-core-15", tool_calls: 18, messages: 40, cost: 0.41 },
+        { id: "s4", title: "Dashboard glass", project: "Dashboard", status: "active", model: "hermes-core-15", tool_calls: 16, messages: 33, cost: 0.28 },
+        { id: "s5", title: "Sam's bookings", project: "Sam's window washing", status: "active", model: "hermes-core-15", tool_calls: 9, messages: 21, cost: 0.19 },
       ],
       tools: [{ name: "read", count: 40 }, { name: "edit", count: 22 }, { name: "exec", count: 11 }],
       top_tools: [{ name: "read", count: 40 }, { name: "edit", count: 22 }, { name: "exec", count: 11 }],
       system: { cpu: 31, memory_used: 11.2, memory_total_gb: 32, disk_used_pct: 44 },
       cognitive_load: 0.46,
-      brain_activity: [
-        { id: "atlas", label: "Atlas", load: 0.88, kind: "project" },
-        { id: "nds", label: "Hermes NDS", load: 0.7, kind: "project" },
-        { id: "core", label: "Core", load: 0.55, kind: "system" },
-      ],
+      brain_activity: HOUSE.map((p) => ({ id: p.id, label: p.name, load: num01(p.progress), kind: "project" })),
       activity_log: [
         { who: "Hermes", what: "Standing by.", t: Date.now() },
         { tool: "edit", message: "Patched command surface.", time: "12:01:04" },
       ],
-      projects: [
-        { id: "atlas", name: "Atlas", category: "Briefing", description: "Lead thread. Session warm.", progress: 72 },
-        { id: "nds", name: "Hermes NDS", category: "Command", description: "This glass.", progress: 64 },
-      ],
+      projects: HOUSE.map((p) => Object.assign({}, p)),
     };
 
     function dash() { return state.dash || mock; }
@@ -330,31 +359,7 @@
     }
     function programmes(d) {
       const raw = state.projects.length ? state.projects : (d.projects || d.deliverables || []);
-      if (raw.length) {
-        return raw.map((p) => ({
-          id: p.id || p.name,
-          name: p.name || p.title || "Untitled",
-          category: p.category || "Programme",
-          description: p.description || "",
-          progress: pct(p.progress ?? 0),
-        }));
-      }
-      const seen = new Set();
-      const out = [];
-      sessionsOf(d).forEach((s) => {
-        const name = s.project || s.title;
-        const key = String(name || "").toLowerCase();
-        if (!name || seen.has(key)) return;
-        seen.add(key);
-        out.push({
-          id: s.id || key,
-          name,
-          category: s.source || "Session",
-          description: (s.active !== false && s.status !== "idle" ? "Live. " : "Idle. ") + (s.model || ""),
-          progress: s.active !== false ? 60 : 20,
-        });
-      });
-      return out;
+      return mergeBoard(raw);
     }
 
     function catalog() {
