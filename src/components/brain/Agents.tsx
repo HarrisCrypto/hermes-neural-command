@@ -25,6 +25,7 @@ function OrbitAgent({
 }) {
   const group = useRef<THREE.Group>(null);
   const glow = useRef<THREE.Mesh>(null);
+  const pointerDown = useRef<{ x: number; y: number } | null>(null);
   const radius = 3.35 + (index % 3) * 0.42;
   const speed = 0.16 + index * 0.028;
   const tilt = ((index * 0.7) % 1) * 0.9 - 0.45;
@@ -51,20 +52,36 @@ function OrbitAgent({
   return (
     <Trail width={selected ? 0.55 : 0.28} length={7} color={agent.color} attenuation={(w) => w * w} decay={1.4}>
       <group ref={group}>
+        <mesh ref={glow}>
+          <sphereGeometry args={[size, 16, 16]} />
+          <meshBasicMaterial color={agent.color} transparent opacity={0.95} />
+        </mesh>
         <mesh
-          ref={glow}
           onPointerOver={(e) => {
             e.stopPropagation();
             onHover(agent.id);
+            document.body.style.cursor = "pointer";
           }}
-          onPointerOut={() => onHover(null)}
-          onClick={(e) => {
+          onPointerOut={() => {
+            onHover(null);
+            document.body.style.cursor = "";
+          }}
+          onPointerDown={(e) => {
             e.stopPropagation();
-            onSelect(agent.id);
+            pointerDown.current = { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY };
+          }}
+          onPointerUp={(e) => {
+            e.stopPropagation();
+            const start = pointerDown.current;
+            pointerDown.current = null;
+            if (!start) return;
+            const dx = e.nativeEvent.clientX - start.x;
+            const dy = e.nativeEvent.clientY - start.y;
+            if (dx * dx + dy * dy < 100) onSelect(agent.id);
           }}
         >
-          <sphereGeometry args={[size, 16, 16]} />
-          <meshBasicMaterial color={agent.color} transparent opacity={0.95} />
+          <sphereGeometry args={[Math.max(0.28, size * 2.6), 12, 12]} />
+          <meshBasicMaterial transparent opacity={0.01} depthWrite={false} />
         </mesh>
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <ringGeometry args={[size * 1.7, size * 2.3, 32]} />

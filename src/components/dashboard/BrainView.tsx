@@ -23,8 +23,11 @@ const BrainCanvas = dynamic(
 export function BrainView() {
   const { data, fps, hoverAgentId, focusAgentId, selectedSessionId, selectSession, setFocusAgentId } = useHermes();
   const hover = data.agents.find((a) => a.id === hoverAgentId);
-  const selected = data.sessions.find((s) => s.id === selectedSessionId);
-  const selectedAgent = data.agents.find((a) => a.id === (selected?.agentId ?? focusAgentId));
+  const selectedAgent = data.agents.find((a) => a.id === (focusAgentId ?? undefined));
+  const selected =
+    data.sessions.find((s) => s.id === selectedSessionId) ??
+    data.sessions.find((s) => s.agentId === focusAgentId);
+  const showPopup = Boolean(selectedAgent || selected);
 
   return (
     <div className="flex min-h-0 flex-col gap-2">
@@ -55,7 +58,7 @@ export function BrainView() {
             {hover.name} · {hover.role} · {hover.status}
           </div>
         )}
-        {selected && (
+        {showPopup && (
           <div className="absolute right-3 bottom-14 z-20 w-[220px] rounded-[10px] border border-cyan-400/25 bg-[#04070e]/95 p-3 shadow-[0_0_30px_rgba(0,240,255,0.15)] backdrop-blur-md">
             <button
               type="button"
@@ -67,22 +70,23 @@ export function BrainView() {
             >
               ×
             </button>
-            <div className="pr-4 text-[11px] font-bold">{selected.title}</div>
+            <div className="pr-4 text-[11px] font-bold">{selected?.title ?? selectedAgent?.name ?? "Agent"}</div>
             <div className="font-mono mb-2 text-[7px] font-semibold tracking-[0.12em] text-fuchsia-400 uppercase">
-              {selected.model} · {selected.source}
+              {selected?.model ?? selectedAgent?.role ?? "CORE"}
+              {selected?.source ? ` · ${selected.source}` : ""}
             </div>
             <div className="grid grid-cols-2 gap-1">
-              <PopStat v={fmt(selected.toolCalls)} l="Tools" />
-              <PopStat v={fmt(selected.messages)} l="Msgs" />
-              <PopStat v={fmtCost(selected.cost)} l="Cost" />
-              <PopStat v={selected.active ? "LIVE" : "—"} l="Status" />
+              <PopStat v={fmt(selected?.toolCalls ?? 0)} l="Tools" />
+              <PopStat v={fmt(selected?.messages ?? Math.round(selectedAgent?.load ?? 0))} l={selected ? "Msgs" : "Load"} />
+              <PopStat v={selected ? fmtCost(selected.cost) : `${Math.round(selectedAgent?.load ?? 0)}%`} l={selected ? "Cost" : "Load"} />
+              <PopStat v={selected ? (selected.active ? "LIVE" : "—") : (selectedAgent?.status ?? "—").toUpperCase()} l="Status" />
             </div>
             <div className="mt-2 flex flex-wrap gap-1">
               <span className="rounded border border-fuchsia-400/25 bg-fuchsia-500/10 px-1 py-0.5 font-mono text-[6px] text-fuchsia-300">
                 {selectedAgent?.name ?? "AGENT"}
               </span>
               <span className="rounded border border-fuchsia-400/25 bg-fuchsia-500/10 px-1 py-0.5 font-mono text-[6px] text-fuchsia-300">
-                {selected.model}
+                {selected?.model ?? selectedAgent?.role ?? "core"}
               </span>
             </div>
           </div>
