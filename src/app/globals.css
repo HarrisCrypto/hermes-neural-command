@@ -118,6 +118,13 @@
   border-radius: 18px;
 }
 
+.k {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9aa3b5;
+}
+
 @keyframes grid-shift {
   to {
     background-position: 50px 50px;

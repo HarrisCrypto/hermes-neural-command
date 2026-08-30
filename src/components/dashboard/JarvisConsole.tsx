@@ -105,14 +105,14 @@ export function JarvisConsole() {
         Press and hold · release to send
       </p>
       <div className="flex flex-wrap justify-center gap-2">
-        {["status", "projects", "focus atlas"].map((cmd) => (
+        {["status", "what are we working on", "usage", "last activity"].map((cmd) => (
           <button
             key={cmd}
             type="button"
             onClick={() => sendCommand(cmd)}
             className="rounded-full border border-white/10 bg-white/3 px-3 py-1.5 text-[11px] tracking-[0.08em] text-[#e8eef8]"
           >
-            {cmd.replace("focus ", "")}
+            {cmd === "what are we working on" ? "Projects" : cmd === "last activity" ? "Activity" : cmd === "usage" ? "Usage" : "Status"}
           </button>
         ))}
       </div>
