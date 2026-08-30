@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>HERMES — Neural Command Center</title>
+<!--
+  STANDALONE NETLIFY DROP-IN
+  ==========================
+  This one HTML file is the new command glass. Upload it to the same
+  Netlify site Hermes already shares. She does not need a new format.
+
+  She keeps publishing her real work here (same as the old HUD):
+    GET  {origin}/api/dashboard.json
+    GET  {origin}/api/deliverables
+    GET  {origin}/api/session/:id
+    WS   {origin}/ws
+
+  How this page finds her:
+    • On localhost or a trycloudflare tunnel → use this origin (the agent).
+    • On Netlify → use HERMES_DEFAULT_ORIGIN below (her usual tunnel).
+    • Or type a URL in "Hermes uplink" at the bottom.
+
+  How the file is built (read top to bottom):
+    1. CSS  — HUD, type, glow
+    2. HTML — header, nav, 3D canvas, charts, Jarvis
+    3. Feed — fetchD() + conn()  (her live JSON / WebSocket)
+    4. UI   — render() paints stats, sessions, activity
+    5. Brain — Three.js core, rings, clickable nodes
+    6. Jarvis — typed commands over the live totals
+    7. Fallback mesh — only if she is unreachable
+-->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;800&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{--c:#00f0ff;--p:#a855f7;--k:#ec4899;--g:#22d3ee;--bg:#020308;--pn:rgba(6,12,28,.88);--brd:rgba(0,240,255,.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:#fff;font-family:Rajdhani,sans-serif;min-height:100vh;font-size:14px;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 120% 80% at 25% 35%,rgba(0,240,255,.18),transparent 50%),radial-gradient(ellipse 100% 70% at 75% 65%,rgba(168,85,247,.15),transparent 50%);pointer-events:none}
+body::after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;background-image:linear-gradient(rgba(0,240,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,.03) 1px,transparent 1px);background-size:50px 50px}
+.scanlines{position:fixed;inset:0;z-index:40;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.035) 2px,rgba(0,0,0,.035) 4px)}
+.app{display:grid;grid-template-columns:200px 1fr;gap:8px;padding:8px;min-height:100vh;position:relative;z-index:2}
+.header,.panel,.hud{background:var(--pn);border:1px solid var(--brd);border-radius:10px;padding:10px;position:relative;overflow:hidden;backdrop-filter:blur(8px)}
+.header{grid-column:1/-1;padding:8px 16px;box-shadow:0 0 20px rgba(0,240,255,.25)}
+.header::before{content:"";position:absolute;top:-1px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--c),var(--p),var(--k),transparent);animation:sb 3s linear infinite}
+@keyframes sb{to{transform:translateX(100%)}from{transform:translateX(-100%)}}
+.hc{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;border-radius:8px;border:2px solid rgba(0,240,255,.4);background:linear-gradient(135deg,rgba(0,240,255,.2),rgba(168,85,247,.2));display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-weight:800;color:#7ef6ff;box-shadow:0 0 20px rgba(0,240,255,.5)}
+.bt{font-family:Orbitron;font-size:16px;font-weight:800;letter-spacing:.12em;background:linear-gradient(135deg,var(--c),var(--p));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.bs{font-family:"Share Tech Mono";font-size:8px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:6px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g);animation:dp 1.5s infinite}
+@keyframes dp{50%{opacity:.5;transform:scale(.7)}}
+.hs{display:flex;gap:6px;flex-wrap:wrap}
+.st{text-align:center;padding:3px 8px;border-radius:6px;background:rgba(0,240,255,.04);border:1px solid rgba(0,240,255,.1)}
+.sv{font-family:"Share Tech Mono";font-size:13px;font-weight:700;color:var(--c)}
+.sl{font-size:7px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em}
+.sidebar{display:flex;flex-direction:column;gap:6px}
+.pt{font-family:Orbitron;font-size:8px;font-weight:700;color:rgba(0,240,255,.6);text-transform:uppercase;letter-spacing:.15em;margin-bottom:6px}
+.ni{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:11px;color:rgba(255,255,255,.6);border:1px solid transparent}
+.ni:hover,.ni.act{background:rgba(0,240,255,.1);border-color:rgba(0,240,255,.3);color:var(--c)}
+.si,.dsi{padding:5px;border-radius:4px;margin-bottom:3px;cursor:pointer;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);text-align:left;width:100%;color:inherit;font:inherit}
+.si:hover,.dsi:hover{background:rgba(0,240,255,.05);border-color:rgba(0,240,255,.15)}
+.sti,.dsit{font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sm,.dsim{font-family:"Share Tech Mono";font-size:7px;color:rgba(255,255,255,.3);margin-top:2px}
+.tb{display:flex;align-items:center;gap:5px;padding:3px 0;font-size:8px}
+.tn{flex:0 0 65px;color:rgba(255,255,255,.55);font-family:"Share Tech Mono";font-size:7px}
+.tt{flex:1;height:3px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden}
+.tf{height:100%;background:linear-gradient(90deg,var(--c),var(--p))}
+.tc{width:24px;text-align:right;font-family:"Share Tech Mono";color:var(--c);font-size:7px}
+.center{display:flex;flex-direction:column;gap:8px;min-width:0}
+.hero{min-height:360px;position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--brd);box-shadow:0 0 20px rgba(0,240,255,.22);background:rgba(2,4,10,.55)}
+#brain-canvas{width:100%;height:100%;display:block;cursor:grab;position:absolute;inset:0}
+.ov{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;pointer-events:none;z-index:5}
+.bb,.bs2{padding:3px 7px;border-radius:4px;font-family:"Share Tech Mono";font-size:8px;background:rgba(6,12,28,.8);border:1px solid rgba(0,240,255,.2);color:var(--c)}
+.cog{position:absolute;top:6px;left:50%;transform:translateX(-50%);padding:3px 10px;border-radius:14px;font-family:Orbitron;font-size:8px;font-weight:700;background:rgba(6,12,28,.85);border:1px solid rgba(0,240,255,.3);color:var(--c);letter-spacing:.08em;pointer-events:none;z-index:5}
+.binf{position:absolute;bottom:8px;left:8px;right:8px;display:flex;gap:5px;flex-wrap:wrap;pointer-events:none;z-index:5}
+.bs2{color:rgba(255,255,255,.7)}.bs2 b{color:var(--c)}
+.bh{position:absolute;bottom:38px;left:50%;transform:translateX(-50%);font-family:"Share Tech Mono";font-size:7px;color:rgba(0,240,255,.3);pointer-events:none;z-index:5;white-space:nowrap}
+.panel-zone{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+canvas.chart{width:100%;height:130px;display:block}
+.gauge-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.sys-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.sys-item{padding:5px;border-radius:4px;background:rgba(0,240,255,.03);border:1px solid rgba(0,240,255,.06)}
+.sys-label{font-family:Orbitron;font-size:6px;color:rgba(255,255,255,.35);text-transform:uppercase}
+.sys-val{font-family:"Share Tech Mono";font-size:14px;font-weight:700;color:var(--c)}
+.sys-bar{height:2px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:3px;overflow:hidden}
+.sys-fill{height:100%;background:linear-gradient(90deg,var(--c),var(--p))}
+.act-log{max-height:140px;overflow-y:auto;font-family:"Share Tech Mono";font-size:7px}
+.le{display:flex;gap:4px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.lets{color:rgba(255,255,255,.25)}.letp{color:var(--c);font-weight:700}.lem{color:rgba(255,255,255,.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apop{position:absolute;bottom:50px;right:12px;width:220px;background:rgba(4,7,14,.95);border:1px solid rgba(0,240,255,.25);border-radius:10px;padding:12px;z-index:50}
+.apop.hidden{display:none}
+.ap-n{font-size:11px;font-weight:700;padding-right:18px}
+.ap-tp{font-family:"Share Tech Mono";font-size:7px;color:var(--p);margin:4px 0 8px}
+.ap-st{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.as{padding:4px 5px;border-radius:4px;background:rgba(0,240,255,.04);border:1px solid rgba(0,240,255,.08)}
+.vv{font-size:12px;font-weight:700;color:var(--c);font-family:"Share Tech Mono"}
+.ll{font-size:5px;color:rgba(255,255,255,.3);text-transform:uppercase;font-family:Orbitron}
+.cb{position:absolute;top:5px;right:5px;width:18px;height:18px;border:1px solid rgba(255,255,255,.1);background:transparent;color:rgba(255,255,255,.4);cursor:pointer;border-radius:3px}
+.dg{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.pc{background:var(--pn);border:1px solid var(--brd);border-radius:12px;padding:12px}
+.pcn{font-size:13px;font-weight:700}
+.pcc{font-family:"Share Tech Mono";font-size:8px;color:rgba(255,255,255,.3)}
+.pcd{font-size:10px;color:rgba(255,255,255,.5);margin-top:6px}
+.hidden{display:none!important}
+.jarvis,.uplink{display:flex;flex-direction:column;gap:6px}
+.jlog{max-height:88px;overflow-y:auto;font-family:"Share Tech Mono";font-size:8px;color:rgba(255,255,255,.55)}
+.jlog .j{color:#b8f4ff}.jlog .u{color:rgba(255,255,255,.5)}
+.row{display:flex;gap:6px}
+input,button.cmd{font-family:"Share Tech Mono";font-size:11px;border-radius:8px;border:1px solid rgba(0,240,255,.2);background:#04070e;color:#d7f7ff;padding:7px 10px}
+input{flex:1}button.cmd{cursor:pointer;color:#021018;background:var(--c);border:0;font-weight:700}
+button.ghost{background:transparent;color:var(--c);border:1px solid rgba(0,240,255,.25);cursor:pointer;border-radius:8px;padding:7px 10px;font-family:"Share Tech Mono";font-size:10px}
+.ft{grid-column:1/-1;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:5px 12px;background:rgba(6,12,28,.6);border:1px solid rgba(0,240,255,.08);border-radius:8px;font-family:"Share Tech Mono";font-size:8px;color:rgba(255,255,255,.3)}
+.fp{color:var(--c)}
+.boot{position:fixed;inset:0;z-index:80;background:#020308;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.boot.out{opacity:0;pointer-events:none;transition:opacity .4s}
+.boot .logo{width:64px;height:64px;font-size:22px}
+.how{font-family:"Share Tech Mono";font-size:10px;color:rgba(183,244,255,.8);max-width:420px;line-height:1.6}
+.bar{width:min(420px,90vw);height:4px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--c),var(--p),var(--k))}
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  .sidebar{display:grid;grid-template-columns:repeat(2,1fr)}
+  .panel-zone,.dg{grid-template-columns:1fr}
+  .hero{min-height:240px}
+}
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+<div class="boot" id="boot">
+  <div class="logo">H</div>
+  <div class="bt">HERMES</div>
+  <div class="bs">NEURAL COMMAND CENTER · drop-in for your agent</div>
+  <div class="how" id="boot-log"></div>
+  <div class="bar"><i id="boot-bar"></i></div>
+</div>
+
+<div class="app">
+  <header class="header">
+    <div class="hc">
+      <div class="brand">
+        <div class="logo">H</div>
+        <div>
+          <div class="bt">HERMES</div>
+          <div class="bs"><span class="dot"></span>NDS v15 · <span id="clock">--:--:--</span></div>
+        </div>
+      </div>
+      <div class="hs">
+        <div class="st"><div class="sv" id="hs-sessions">--</div><div class="sl">Sessions</div></div>
+        <div class="st"><div class="sv" id="hs-tokens">--</div><div class="sl">Tokens</div></div>
+        <div class="st"><div class="sv" id="hs-tools">--</div><div class="sl">Calls</div></div>
+        <div class="st"><div class="sv" id="hs-cost">--</div><div class="sl">Cost</div></div>
+        <div class="st"><div class="sv" id="hs-msgs">--</div><div class="sl">Messages</div></div>
+        <div class="st"><div class="sv" id="hs-cog">--</div><div class="sl">Load</div></div>
+      </div>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="panel">
+      <div class="pt">Nav</div>
+      <div class="ni act" data-view="brain">Brain</div>
+      <div class="ni" data-view="projects">Projects</div>
+      <div class="ni" data-view="sessions">Sessions</div>
+      <div class="ni" data-view="logs">Activity</div>
+    </div>
+    <div class="panel"><div class="pt">Projects</div><div id="del-sidebar-list">Waiting for Hermes…</div></div>
+    <div class="panel"><div class="pt">Sessions</div><div id="session-list">Connecting…</div></div>
+    <div class="panel"><div class="pt">Tools</div><div id="tool-list">--</div></div>
+  </aside>
+
+  <main class="center">
+    <div class="hero" id="hero">
+      <canvas id="brain-canvas"></canvas>
+      <div class="ov"><div class="bb">NEURAL CORE · v15</div><div class="bb" id="brain-fps">60 FPS</div></div>
+      <div class="cog" id="cog-load">COGNITIVE LOAD: --%</div>
+      <div class="binf">
+        <div class="bs2">Nodes: <b id="bs-nodes">0</b></div>
+        <div class="bs2">Agents: <b id="bs-agents">0</b></div>
+        <div class="bs2">Synapses: <b id="bs-syn">0</b></div>
+        <div class="bs2">CPU: <b id="bs-cpu">--%</b></div>
+        <div class="bs2">MEM: <b id="bs-mem">--</b></div>
+      </div>
+      <div class="bh">Drag to rotate · Scroll to zoom · Click nodes for her sessions</div>
+      <div class="apop hidden" id="agentPopup">
+        <button class="cb" type="button" onclick="ca()">×</button>
+        <div class="ap-n" id="ap-name">Agent</div>
+        <div class="ap-tp" id="ap-type">SESSION</div>
+        <div class="ap-st" id="ap-stats"></div>
+      </div>
+    </div>
+
+    <div id="brain-panels">
+      <div class="panel-zone">
+        <div class="hud"><div class="pt">Activity</div><div class="gauge-row" id="gaugeRow"></div><canvas class="chart" id="radarCanvas"></canvas></div>
+        <div class="hud"><div class="pt">Performance</div><canvas class="chart" id="lineCanvas"></canvas></div>
+        <div class="hud"><div class="pt">System</div>
+          <div class="sys-grid">
+            <div class="sys-item"><div class="sys-label">CPU</div><div class="sys-val" id="sys-cpu">--%</div><div class="sys-bar"><div class="sys-fill" id="sys-cpu-bar" style="width:0"></div></div></div>
+            <div class="sys-item"><div class="sys-label">Memory</div><div class="sys-val" id="sys-mem">--</div><div class="sys-bar"><div class="sys-fill" id="sys-mem-bar" style="width:0"></div></div></div>
+            <div class="sys-item"><div class="sys-label">Disk</div><div class="sys-val" id="sys-disk">--%</div><div class="sys-bar"><div class="sys-fill" id="sys-disk-bar" style="width:0"></div></div></div>
+            <div class="sys-item"><div class="sys-label">Network</div><div class="sys-val" id="sys-net">--</div><div class="sys-bar"><div class="sys-fill" id="sys-net-bar" style="width:40%"></div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="hud"><div class="pt">Stream</div><div class="act-log" id="log-feed">Waiting for Hermes…</div></div>
+    </div>
+
+    <div id="projects-view" class="hidden"><div class="pt" id="del-count">Projects</div><div class="dg" id="del-grid"></div></div>
+    <div id="sessions-view" class="hidden"><div class="dg" id="sessions-grid" style="grid-template-columns:1fr"></div></div>
+    <div id="logs-view" class="hidden"><div class="hud"><div class="pt">Activity Feed</div><div class="act-log" id="log-feed-full" style="max-height:360px"></div></div></div>
+
+    <section class="hud jarvis">
+      <div class="pt">Jarvis · cognitive layer</div>
+      <div class="jlog" id="jlog">Address the core — try “status”, “projects”, or “connect https://…”</div>
+      <form class="row" id="jform">
+        <input id="jinput" placeholder="Command the neural core…" autocomplete="off">
+        <button class="cmd" type="submit">Send</button>
+      </form>
+    </section>
+
+    <section class="hud uplink">
+      <div class="pt">Hermes uplink — same feed as the old Netlify HUD</div>
+      <form class="row" id="oform">
+        <input id="origin" placeholder="https://your-agent.trycloudflare.com">
+        <button class="cmd" type="submit">Connect</button>
+        <button class="ghost" type="button" id="mesh-btn">Local mesh</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="ft">
+    <div>HERMES · NDS v15 · <span id="ft-uptime">--</span></div>
+    <div><span class="fp" id="ft-fps">60</span> FPS · Data: <span class="fp" id="ft-data">Connecting</span></div>
+  </footer>
+</div>
+
+<script>
+/*
+  FEED
+  ----
+  HERMES_DEFAULT_ORIGIN is the Cloudflare tunnel your agent already uses.
+  On Netlify this page will pull her work from that origin.
+  When you serve this file FROM the agent (localhost / trycloudflare),
+  it talks to window.location.origin instead — no extra config.
+*/
+var HERMES_DEFAULT_ORIGIN = "https://area-interval-possession-options.trycloudflare.com";
+
+function resolveOrigin() {
+  var stored = localStorage.getItem("hermes.origin");
+  if (stored) return stored.replace(/\/$/, "");
+  var host = location.hostname;
+  if (host.indexOf("trycloudflare.com") !== -1 || host === "localhost" || host === "127.0.0.1") {
+    return location.origin;
+  }
+  return HERMES_DEFAULT_ORIGIN;
+}
+
+var ORIGIN = resolveOrigin();
+var DATA = null, MESH = false, ws = null, wsRetry = 0, startTime = Date.now();
+var lineData = [];
+for (var i = 0; i < 40; i++) lineData.push(30 + Math.random() * 40);
+
+function fmt(n) {
+  if (n >= 1e9) return (n / 1e9).toFixed(1) + "B";
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + "M";
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + "K";
+  return Math.round(n).toString();
+}
+function fmtC(n) {
+  if (n == null) return "--";
+  return n < 0.01 ? "$" + n.toFixed(4) : "$" + n.toFixed(2);
+}
+function S(id, val) { var e = document.getElementById(id); if (e) e.innerHTML = val; }
+
+function api(path) { return ORIGIN.replace(/\/$/, "") + path; }
+
+async function fetchD() {
+  try {
+    var r = await fetch(api("/api/dashboard.json"), { signal: AbortSignal.timeout(8000) });
+    if (r.ok) {
+      DATA = await r.json();
+      MESH = false;
+      S("ft-data", "Polling agent");
+      up();
+      return;
+    }
+  } catch (e) {}
+  if (!DATA) startMesh();
+}
+
+function conn() {
+  try {
+    var url = api("/ws").replace(/^http/, "ws");
+    ws = new WebSocket(url);
+    ws.onmessage = function (e) {
+      try { DATA = JSON.parse(e.data); MESH = false; up(); } catch (ex) {}
+    };
+    ws.onopen = function () { wsRetry = 0; S("ft-data", "WebSocket"); };
+    ws.onclose = function () {
+      S("ft-data", MESH ? "Local mesh" : "Polling");
+      wsRetry++;
+      setTimeout(conn, Math.min(3000 * wsRetry, 30000));
+    };
+    ws.onerror = function () { try { ws.close(); } catch (ex) {} };
+  } catch (e) { setTimeout(conn, 10000); }
+}
+
+function fetchDeliverables() {
+  fetch(api("/api/deliverables")).then(function (r) { return r.json(); }).then(paintProjects).catch(function () {});
+}
+
+function up() {
+  if (!DATA) return;
+  var t = DATA.totals || {}, sy = DATA.system || {}, cg = DATA.cognitive_load || 50, ba = DATA.brain_activity || {};
+  S("hs-sessions", fmt(t.sessions || 0));
+  S("hs-tokens", fmt((t.input_tokens || 0) + (t.output_tokens || 0)));
+  S("hs-tools", fmt(t.tool_calls || 0));
+  S("hs-cost", fmtC(t.total_cost || 0));
+  S("hs-msgs", fmt(t.messages || 0));
+  S("hs-cog", Math.round(cg) + "%");
+  S("cog-load", "COGNITIVE LOAD: " + Math.round(cg) + "%");
+  var sess = DATA.recent_sessions || [];
+  S("bs-nodes", fmt(sess.length));
+  S("bs-agents", fmt((DATA.subagents || []).length || sess.length));
+  S("bs-syn", fmt(t.tool_calls || 0));
+  if (sy.cpu != null) { S("bs-cpu", Math.round(sy.cpu) + "%"); S("sys-cpu", Math.round(sy.cpu) + "%"); document.getElementById("sys-cpu-bar").style.width = sy.cpu + "%"; }
+  if (sy.memory_used != null) {
+    var mem = sy.memory_total_gb ? sy.memory_used.toFixed(1) + "/" + sy.memory_total_gb + "GB" : Math.round(sy.memory_used) + "%";
+    S("bs-mem", mem); S("sys-mem", mem);
+    document.getElementById("sys-mem-bar").style.width = Math.min(100, sy.memory_total_gb ? sy.memory_used / sy.memory_total_gb * 100 : sy.memory_used) + "%";
+  }
+  if (sy.disk_used_pct != null) { S("sys-disk", Math.round(sy.disk_used_pct) + "%"); document.getElementById("sys-disk-bar").style.width = sy.disk_used_pct + "%"; }
+  if (sy.network_sent_mb != null) S("sys-net", Math.round((sy.network_sent_mb || 0) + (sy.network_recv_mb || 0)) + " MB");
+
+  var tools = DATA.top_tools || [], maxT = Math.max.apply(null, tools.map(function (x) { return x.count; }).concat([1]));
+  S("tool-list", tools.slice(0, 8).map(function (x) {
+    return '<div class="tb"><div class="tn">' + (x.name || x.tool_name || "") + '</div><div class="tt"><div class="tf" style="width:' + (x.count / maxT * 100) + '%"></div></div><div class="tc">' + x.count + "</div></div>";
+  }).join("") || '<div class="sm">No tools yet</div>');
+
+  S("session-list", sess.slice(0, 8).map(function (s) {
+    return '<button class="si" type="button" onclick="ssd(\'' + (s.session_id || "") + '\')"><div class="sti">' + (s.title || "Untitled") + '</div><div class="sm">' + (s.model || "") + " · " + (s.source || "") + "</div></button>";
+  }).join("") || '<div class="sm">No sessions yet</div>');
+
+  var al = DATA.activity_log || [];
+  function row(a) { return '<div class="le"><span class="lets">' + (a.time || "") + '</span><span class="letp">' + (a.tool_name || a.type || "") + '</span><span class="lem">' + (a.message || "") + "</span></div>"; }
+  S("log-feed", al.slice(0, 12).map(row).join("") || '<div class="sm">No activity yet</div>');
+  S("log-feed-full", al.slice(0, 40).map(row).join("") || '<div class="sm">No activity yet</div>');
+  S("sessions-grid", sess.slice(0, 12).map(function (s) {
+    return '<button class="pc" type="button" onclick="ssd(\'' + (s.session_id || "") + '\')"><div class="pcn">' + (s.title || "Untitled") + '</div><div class="pcc">' + (s.model || "") + " · " + (s.source || "") + "</div></button>";
+  }).join(""));
+
+  drawGauges(ba); drawRadar(ba); drawLine();
+  if (typeof updateBrainNodes === "function") updateBrainNodes();
+  targetIntensity = 0.3 + (cg / 100) * 0.7;
+}
+
+function paintProjects(data) {
+  var p = (data && data.projects) || [], a = (data && (data.artifacts || data.deliverables)) || [];
+  S("del-count", p.length + " programmes on the board");
+  S("del-sidebar-list", p.map(function (x) {
+    return '<div class="dsi"><div class="dsit">' + (x.icon || "◈") + " " + (x.name || "") + '</div><div class="dsim">' + (x.category || "") + " · " + (x.progress || 0) + "%</div></div>";
+  }).join("") || '<div class="sm">No projects yet</div>');
+  if (!p.length) { S("del-grid", '<div class="pc"><div class="pcd">No programmes in the vault.</div></div>'); return; }
+  S("del-grid", p.map(function (x) {
+    return '<article class="pc"><div class="pcn">' + (x.icon || "◈") + " " + (x.name || "") + '</div><div class="pcc">' + (x.category || "") + '</div><div class="pcd">' + (x.description || "") + "</div></article>";
+  }).join(""));
+}
+
+function ssd(id) {
+  if (!id) return;
+  fetch(api("/api/session/" + id)).then(function (r) { return r.json(); }).then(function (d) {
+    if (!d || !(d.id || d.session_id)) return;
+    sap({ name: d.title || "Session", model: d.model, source: d.source, tools: d.tool_calls, msgs: d.messages, cost: d.cost, active: d.active !== false });
+  }).catch(function () {
+    var s = (DATA.recent_sessions || []).find(function (x) { return String(x.session_id) === String(id); });
+    if (s) sap({ name: s.title, model: s.model, source: s.source, tools: s.tool_calls, msgs: s.messages, cost: s.cost, active: !s.archived });
+  });
+}
+function sap(d) {
+  S("ap-name", d.name || "Agent");
+  S("ap-type", (d.model || "") + (d.source ? " · " + d.source : ""));
+  S("ap-stats",
+    '<div class="as"><div class="vv">' + fmt(d.tools || 0) + '</div><div class="ll">TOOLS</div></div>' +
+    '<div class="as"><div class="vv">' + fmt(d.msgs || 0) + '</div><div class="ll">MSGS</div></div>' +
+    '<div class="as"><div class="vv">' + fmtC(d.cost || 0) + '</div><div class="ll">COST</div></div>' +
+    '<div class="as"><div class="vv">' + (d.active ? "LIVE" : "—") + '</div><div class="ll">STATUS</div></div>');
+  document.getElementById("agentPopup").classList.remove("hidden");
+}
+function ca() { document.getElementById("agentPopup").classList.add("hidden"); }
+
+function drawGauges(ba) {
+  ba = ba || {};
+  var keys = ["reasoning", "tool_use", "memory", "output", "reflection", "proactive"];
+  var labels = ["R", "T", "M", "O", "R", "P"];
+  var colors = ["#00f0ff", "#a855f7", "#ec4899", "#22d3ee", "#fbbf24", "#34d399"];
+  var R = 26, circ = 2 * Math.PI * R, html = "";
+  keys.forEach(function (k, i) {
+    var v = Math.min(1, ba[k] || 0.45);
+    html += '<div><svg width="58" height="58" viewBox="0 0 60 60"><circle cx="30" cy="30" r="' + R + '" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="6"/><circle cx="30" cy="30" r="' + R + '" fill="none" stroke="' + colors[i] + '" stroke-width="6" stroke-linecap="round" stroke-dasharray="' + circ + '" stroke-dashoffset="' + (circ * (1 - v)) + '" transform="rotate(-90 30 30)"/><text x="30" y="34" text-anchor="middle" fill="' + colors[i] + '" font-size="10" font-family="Share Tech Mono">' + Math.round(v * 100) + '%</text></svg><div class="sl">' + labels[i] + "</div></div>";
+  });
+  S("gaugeRow", html);
+}
+function drawRadar(ba) {
+  ba = ba || {};
+  var keys = ["reasoning", "tool_use", "memory", "output", "reflection", "proactive"];
+  var labels = ["Reason", "Tools", "Memory", "Output", "Reflect", "Proact"];
+  var c = document.getElementById("radarCanvas"); if (!c) return;
+  c.width = c.parentElement.clientWidth; c.height = 130;
+  var ctx = c.getContext("2d"), w = c.width, h = c.height, cx = w / 2, cy = h / 2, r = Math.min(w, h) / 2 - 16;
+  if (r < 15) return;
+  ctx.clearRect(0, 0, w, h);
+  ctx.strokeStyle = "rgba(0,240,255,.07)";
+  for (var ring = 1; ring <= 4; ring++) {
+    ctx.beginPath();
+    for (var i = 0; i < 6; i++) {
+      var ang = Math.PI * 2 * i / 6 - Math.PI / 2;
+      var x = cx + Math.cos(ang) * r * ring / 4, y = cy + Math.sin(ang) * r * ring / 4;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.closePath(); ctx.stroke();
+  }
+  ctx.beginPath();
+  keys.forEach(function (k, i) {
+    var ang = Math.PI * 2 * i / 6 - Math.PI / 2;
+    var x = cx + Math.cos(ang) * r * Math.min(1, ba[k] || 0.45);
+    var y = cy + Math.sin(ang) * r * Math.min(1, ba[k] || 0.45);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.closePath();
+  ctx.fillStyle = "rgba(0,240,255,.1)"; ctx.fill();
+  ctx.strokeStyle = "#00f0ff"; ctx.stroke();
+  ctx.fillStyle = "rgba(255,255,255,.35)"; ctx.font = "7px Orbitron"; ctx.textAlign = "center";
+  labels.forEach(function (lab, i) {
+    var ang = Math.PI * 2 * i / 6 - Math.PI / 2;
+    ctx.fillText(lab, cx + Math.cos(ang) * (r + 12), cy + Math.sin(ang) * (r + 12));
+  });
+}
+function drawLine() {
+  var c = document.getElementById("lineCanvas"); if (!c) return;
+  c.width = c.parentElement.clientWidth; c.height = 130;
+  var ctx = c.getContext("2d"), w = c.width, h = c.height;
+  if (DATA && DATA.totals) {
+    var last = lineData[lineData.length - 1] || 50;
+    lineData.push(Math.max(8, Math.min(98, last + (Math.random() - 0.42) * 8)));
+    if (lineData.length > 40) lineData.shift();
+  }
+  ctx.clearRect(0, 0, w, h);
+  ctx.beginPath(); ctx.moveTo(0, h);
+  lineData.forEach(function (v, i) { ctx.lineTo(w * i / (lineData.length - 1), h - v / 100 * h); });
+  ctx.lineTo(w, h); ctx.closePath();
+  var g = ctx.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, "rgba(0,240,255,.18)"); g.addColorStop(1, "rgba(0,240,255,0)");
+  ctx.fillStyle = g; ctx.fill();
+  ctx.beginPath(); ctx.strokeStyle = "#00f0ff";
+  lineData.forEach(function (v, i) {
+    var x = w * i / (lineData.length - 1), y = h - v / 100 * h;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+}
+
+/* Fallback mesh — only used when Hermes is offline so the glass is not empty. */
+function startMesh() {
+  if (DATA) return;
+  MESH = true;
+  S("ft-data", "Local mesh");
+  DATA = {
+    totals: { sessions: 8, input_tokens: 420000, output_tokens: 90000, tool_calls: 640, total_cost: 12.4, messages: 210 },
+    cognitive_load: 54,
+    system: { cpu: 28, memory_used: 11.2, memory_total_gb: 32, disk_used_pct: 41, network_sent_mb: 20, network_recv_mb: 18 },
+    brain_activity: { reasoning: 0.62, tool_use: 0.48, memory: 0.4, output: 0.55, reflection: 0.33, proactive: 0.5 },
+    recent_sessions: [
+      { session_id: "demo-1", title: "Waiting for Hermes", model: "local-mesh", source: "fallback", tool_calls: 4, messages: 3, cost: 0 }
+    ],
+    top_tools: [{ name: "standby", count: 1 }],
+    activity_log: [{ time: new Date().toLocaleTimeString("en-US", { hour12: false }), tool_name: "mesh", message: "Agent unreachable — local mesh is holding the glass" }],
+    subagents: []
+  };
+  up();
+}
+
+/* THREE.JS BRAIN — holographic core + orbiting session nodes */
+var scene, camera, renderer, brainGroup, clock, neuronNodes = [], pathways = [], orbitalRings = [];
+var subagentNodes = [], selectedNode = null, targetIntensity = 0.5;
+var camTheta = 0.3, camPhi = Math.PI / 2.2, camDist = 6.5, isDragging = false, prevMouse = { x: 0, y: 0 };
+var raycaster, mouseNDC, frameCount = 0, lastFPS = performance.now();
+
+function initBrain() {
+  var canvas = document.getElementById("brain-canvas");
+  var box = document.getElementById("hero").getBoundingClientRect();
+  scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x020308, 0.06);
+  camera = new THREE.PerspectiveCamera(60, box.width / box.height, 0.1, 1000);
+  renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+  renderer.setSize(box.width, box.height);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  clock = new THREE.Clock();
+  raycaster = new THREE.Raycaster();
+  mouseNDC = new THREE.Vector2(-999, -999);
+  scene.add(new THREE.AmbientLight(0x112233, 0.3));
+  scene.add(new THREE.PointLight(0x00f0ff, 2, 30));
+  scene.add(new THREE.PointLight(0xa855f7, 1.4, 28));
+  brainGroup = new THREE.Group();
+  scene.add(brainGroup);
+  buildBrain();
+  buildRings();
+  canvas.addEventListener("mousedown", function (e) { isDragging = true; prevMouse = { x: e.clientX, y: e.clientY }; });
+  canvas.addEventListener("mouseup", function () { isDragging = false; });
+  canvas.addEventListener("mouseleave", function () { isDragging = false; });
+  canvas.addEventListener("mousemove", onMove);
+  canvas.addEventListener("wheel", function (e) { camDist = Math.max(3, Math.min(15, camDist + e.deltaY * 0.008)); e.preventDefault(); }, { passive: false });
+  canvas.addEventListener("click", onBrainClick);
+  window.addEventListener("resize", function () {
+    var r = document.getElementById("hero").getBoundingClientRect();
+    camera.aspect = r.width / r.height; camera.updateProjectionMatrix(); renderer.setSize(r.width, r.height);
+  });
+  animate();
+}
+function buildBrain() {
+  var bg = new THREE.IcosahedronGeometry(2.2, 4);
+  var bm = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uIntensity: { value: 0.6 } },
+    vertexShader: "varying vec3 vN;varying vec3 vP;uniform float uTime;void main(){vN=normal;vP=position;float d=sin(position.x*5.0+uTime*1.8)*cos(position.y*5.0+uTime*1.2)*0.06;gl_Position=projectionMatrix*modelViewMatrix*vec4(position+normal*d,1.0);}",
+    fragmentShader: "varying vec3 vN;varying vec3 vP;uniform float uTime;uniform float uIntensity;void main(){float f=pow(1.0-abs(dot(vN,vec3(0,0,1))),3.0);float w=sin(vP.x*12.0+uTime*2.0)*sin(vP.y*12.0+uTime*1.5)*0.5+0.5;vec3 c=mix(vec3(0.0,0.94,1.0),vec3(0.66,0.33,0.97),f);c=mix(c,vec3(0.93,0.29,0.61),w*0.4);float a=0.12+f*0.6*uIntensity+w*0.2*uIntensity;gl_FragColor=vec4(c,a);}",
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide
+  });
+  var mesh = new THREE.Mesh(bg, bm); mesh.userData.shader = bm; brainGroup.add(mesh);
+  var colors = [0x00f0ff, 0xa855f7, 0xec4899, 0x22d3ee, 0xfbbf24];
+  var pos = bg.attributes.position, seen = {};
+  for (var i = 0; i < pos.count; i++) {
+    var x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i), k = x.toFixed(2) + "," + y.toFixed(2);
+    if (seen[k]) continue; seen[k] = 1;
+    var n = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), new THREE.MeshBasicMaterial({ color: colors[i % 5], transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false }));
+    n.position.set(x * 1.02, y * 1.02, z * 1.02);
+    n.userData = { phase: Math.random() * 6, speed: 1 + Math.random() * 3 };
+    brainGroup.add(n); neuronNodes.push(n);
+  }
+}
+function buildRings() {
+  var rc = [0x00f0ff, 0xa855f7, 0xec4899, 0x22d3ee];
+  for (var i = 0; i < 4; i++) {
+    var t = new THREE.Mesh(new THREE.TorusGeometry(3 + i * 0.32, 0.014, 8, 100), new THREE.MeshBasicMaterial({ color: rc[i], transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false }));
+    t.rotation.set(Math.random(), Math.random(), Math.random());
+    t.userData = { rotSpeed: 0.002 + i * 0.001 };
+    scene.add(t); orbitalRings.push(t);
+  }
+}
+function updateBrainNodes() {
+  subagentNodes.forEach(function (n) { scene.remove(n); });
+  subagentNodes = [];
+  if (!DATA) return;
+  var sessions = DATA.recent_sessions || [];
+  var nc = [0xa855f7, 0xec4899, 0x00f0ff, 0x22d3ee, 0xfbbf24, 0x34d399];
+  for (var i = 0; i < Math.min(sessions.length || 6, 10); i++) {
+    var s = sessions[i] || { title: "Agent " + (i + 1) };
+    var node = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 16), new THREE.MeshBasicMaterial({ color: nc[i % nc.length] }));
+    node.userData = { radius: 3.4 + (i % 3) * 0.4, speed: 0.16 + i * 0.03, phase: i, agentData: { name: s.title || "Agent", model: s.model, source: s.source, tools: s.tool_calls, msgs: s.messages, cost: s.cost, active: !s.archived, session_id: s.session_id } };
+    scene.add(node); subagentNodes.push(node);
+  }
+}
+function onMove(e) {
+  var rect = e.target.getBoundingClientRect();
+  mouseNDC.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouseNDC.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  if (isDragging) {
+    camTheta -= (e.clientX - prevMouse.x) * 0.005;
+    camPhi = Math.max(0.3, Math.min(Math.PI - 0.3, camPhi - (e.clientY - prevMouse.y) * 0.005));
+    prevMouse = { x: e.clientX, y: e.clientY };
+  }
+}
+function onBrainClick() {
+  raycaster.setFromCamera(mouseNDC, camera);
+  var hits = raycaster.intersectObjects(subagentNodes);
+  if (hits[0] && hits[0].object.userData.agentData) {
+    var d = hits[0].object.userData.agentData;
+    if (d.session_id) ssd(d.session_id); else sap(d);
+    selectedNode = hits[0].object;
+  } else ca();
+}
+function animate() {
+  requestAnimationFrame(animate);
+  var t = clock.getElapsedTime();
+  frameCount++;
+  var now = performance.now();
+  if (now - lastFPS >= 1000) { S("brain-fps", frameCount + " FPS"); S("ft-fps", frameCount); frameCount = 0; lastFPS = now; }
+  camera.position.set(camDist * Math.sin(camPhi) * Math.sin(camTheta), camDist * Math.cos(camPhi), camDist * Math.sin(camPhi) * Math.cos(camTheta));
+  camera.lookAt(0, 0, 0);
+  brainGroup.rotation.y += 0.001;
+  brainGroup.children.forEach(function (c) {
+    if (c.userData.shader) { c.userData.shader.uniforms.uTime.value = t; c.userData.shader.uniforms.uIntensity.value = targetIntensity; }
+    if (c.userData.speed) { var p = Math.sin(t * c.userData.speed + c.userData.phase) * 0.5 + 0.5; c.material.opacity = 0.3 + p * 0.7 * targetIntensity; }
+  });
+  orbitalRings.forEach(function (r) { r.rotation.x += r.userData.rotSpeed; });
+  subagentNodes.forEach(function (node, i) {
+    var d = node.userData, a = t * d.speed + d.phase;
+    node.position.set(Math.cos(a) * d.radius, Math.sin(a) * d.radius * 0.45, Math.sin(a) * d.radius * 0.25);
+    if (selectedNode === node) node.scale.setScalar(1.45);
+  });
+  renderer.render(scene, camera);
+}
+
+/* JARVIS — reads the same DATA object her feed just wrote */
+function jlog(role, text) {
+  var box = document.getElementById("jlog");
+  var line = document.createElement("div");
+  line.className = role === "jarvis" ? "j" : "u";
+  line.textContent = (role === "jarvis" ? "JARVIS" : "YOU") + " · " + text;
+  if (box.textContent.indexOf("Address the core") === 0) box.innerHTML = "";
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
+function jarvis(q) {
+  var s = q.toLowerCase(), t = (DATA && DATA.totals) || {};
+  if (/help/.test(s)) return "Ask for status, projects, sessions, or system. Say connect and a URL to point at Hermes.";
+  if (/status|sitrep|report/.test(s)) return "Cognitive load " + Math.round((DATA && DATA.cognitive_load) || 0) + "%. " + fmt(t.sessions || 0) + " sessions, " + fmt(t.tool_calls || 0) + " calls, " + fmtC(t.total_cost || 0) + " on the clock. Feed: " + (MESH ? "local mesh" : "Hermes agent") + ".";
+  if (/project/.test(s)) { tv("projects"); return "Opening her programmes."; }
+  if (/session/.test(s)) { tv("sessions"); return "Opening her sessions."; }
+  if (/connect/.test(s)) {
+    var url = q.match(/https?:\/\/\S+/);
+    if (url) { setOrigin(url[0]); return "Uplink set to " + url[0] + ". Pulling her live work."; }
+    return "Current origin " + ORIGIN + ".";
+  }
+  if (/system|cpu|vital/.test(s)) {
+    var sy = (DATA && DATA.system) || {};
+    return "CPU " + Math.round(sy.cpu || 0) + "%, memory " + (sy.memory_used || "--") + ".";
+  }
+  return "Noted. " + (MESH ? "Hermes is not on the wire yet — I am holding the glass on a local mesh." : "Her feed is live. Ask for status if you want the numbers.");
+}
+
+function setOrigin(url) {
+  ORIGIN = url.replace(/\/$/, "");
+  localStorage.setItem("hermes.origin", ORIGIN);
+  document.getElementById("origin").value = ORIGIN;
+  DATA = null; MESH = false;
+  S("ft-data", "Connecting");
+  fetchD(); fetchDeliverables();
+  try { if (ws) ws.close(); } catch (e) {}
+  conn();
+}
+
+function tv(view) {
+  document.querySelectorAll(".ni").forEach(function (n) { n.classList.toggle("act", n.getAttribute("data-view") === view); });
+  document.getElementById("hero").classList.toggle("hidden", view !== "brain");
+  document.getElementById("brain-panels").classList.toggle("hidden", view !== "brain");
+  document.getElementById("projects-view").classList.toggle("hidden", view !== "projects");
+  document.getElementById("sessions-view").classList.toggle("hidden", view !== "sessions");
+  document.getElementById("logs-view").classList.toggle("hidden", view !== "logs");
+}
+
+document.querySelectorAll(".ni").forEach(function (n) {
+  n.addEventListener("click", function () { tv(n.getAttribute("data-view")); });
+});
+document.getElementById("jform").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var q = document.getElementById("jinput").value.trim();
+  if (!q) return;
+  jlog("user", q);
+  jlog("jarvis", jarvis(q));
+  document.getElementById("jinput").value = "";
+});
+document.getElementById("oform").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var v = document.getElementById("origin").value.trim();
+  if (v) setOrigin(v);
+});
+document.getElementById("mesh-btn").addEventListener("click", function () {
+  localStorage.removeItem("hermes.origin");
+  DATA = null; startMesh(); S("ft-data", "Local mesh");
+});
+document.getElementById("origin").value = ORIGIN;
+
+setInterval(function () {
+  S("clock", new Date().toLocaleTimeString("en-US", { hour12: false }));
+  var up = Math.floor((Date.now() - startTime) / 1000);
+  S("ft-uptime", "Uptime " + Math.floor(up / 3600) + "h " + Math.floor((up % 3600) / 60) + "m " + (up % 60) + "s");
+}, 1000);
+
+var bootLines = [
+  "Loading the glass Hermes already publishes to…",
+  "Same paths: /api/dashboard.json · /ws · /api/deliverables",
+  "Spinning holographic core…",
+  "Jarvis on the live totals — READY"
+];
+var bi = 0, bootLog = document.getElementById("boot-log"), bootBar = document.getElementById("boot-bar");
+var bootTimer = setInterval(function () {
+  if (bi < bootLines.length) { bootLog.innerHTML += "▸ " + bootLines[bi] + "<br>"; bi++; bootBar.style.width = (bi / bootLines.length * 100) + "%"; }
+  else { clearInterval(bootTimer); document.getElementById("boot").classList.add("out"); }
+}, 420);
+
+setTimeout(function () {
+  initBrain();
+  fetchD();
+  conn();
+  fetchDeliverables();
+  setInterval(fetchD, 15000);
+}, 200);
+</script>
+</body>
+</html>

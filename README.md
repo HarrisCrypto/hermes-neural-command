@@ -2,9 +2,23 @@
 
 Jarvis-class command glass for the work your Hermes agent already publishes.
 
-## If you just want the Netlify file
+## See it on GitHub Pages
 
-Use **`standalone/index.html`**. That is one HTML file you can:
+After this repo is on GitHub, turn on Pages:
+
+1. Repo **Settings → Pages**
+2. Source: **Deploy from a branch**
+3. Branch: `main`, folder: `/docs`
+
+The live glass will be:
+
+`https://harriscrypto.github.io/hermes-neural-command/`
+
+That is the same single-file dashboard as `standalone/index.html`.
+
+## If you just want the file for Hermes
+
+Use **`standalone/index.html`** (or `standalone/hermes-for-agent.html` — same file). You can:
 
 - upload to the same Netlify site she already shares (replace the old HUD)
 - hand to Hermes so she can see how the glass is built
