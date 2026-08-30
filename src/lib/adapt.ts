@@ -2,7 +2,7 @@ import { AGENTS } from "@/lib/simulation";
 import { clamp, uid } from "@/lib/format";
 import type { RawActivity, RawAgent, RawDashboard, RawDeliverables, RawSession } from "@/lib/protocol";
 import type { Agent, AgentStatus, HermesData, Project, Session } from "@/lib/types";
-import { mergeBoard } from "@/lib/board";
+import { isHiddenCopy, mergeBoard } from "@/lib/board";
 
 const PALETTE = ["#00f0ff", "#a855f7", "#ec4899", "#22d3ee", "#fbbf24", "#34d399", "#fb7185", "#38bdf8"];
 
@@ -103,7 +103,9 @@ export function adaptDeliverables(raw?: RawDeliverables): Project[] {
 }
 
 export function adaptDashboard(raw: RawDashboard, prev?: HermesData, projects?: Project[]): HermesData {
-  const sessions = (raw.recent_sessions || raw.sessions || []).map(adaptSession);
+  const sessions = (raw.recent_sessions || raw.sessions || [])
+    .map(adaptSession)
+    .filter((s) => !isHiddenCopy(s.title) && !isHiddenCopy(s.source));
   const rawAgents = raw.subagents || raw.agents || [];
   const agents = rawAgents.length ? rawAgents.map(adaptAgent) : sessions.length ? agentsFromSessions(sessions) : prev?.agents || [];
 
@@ -119,7 +121,9 @@ export function adaptDashboard(raw: RawDashboard, prev?: HermesData, projects?: 
 
   const sy = raw.system || {};
   const ba = raw.brain_activity || {};
-  const activity = (raw.activity_log || raw.activity || []).map(adaptActivity);
+  const activity = (raw.activity_log || raw.activity || [])
+    .map(adaptActivity)
+    .filter((a) => !isHiddenCopy(a.tool) && !isHiddenCopy(a.message));
 
   return {
     totals: {
@@ -149,10 +153,12 @@ export function adaptDashboard(raw: RawDashboard, prev?: HermesData, projects?: 
     agents: agents.length ? agents : prev?.agents ?? [],
     projects: mergeBoard(projects?.length ? projects : prev?.projects ?? []),
     activity: activity.length ? activity : prev?.activity ?? [],
-    tools: (raw.top_tools || []).map((x) => ({
-      name: x.name || x.tool_name || "tool",
-      count: x.count ?? 0,
-    })),
+    tools: (raw.top_tools || [])
+      .map((x) => ({
+        name: x.name || x.tool_name || "tool",
+        count: x.count ?? 0,
+      }))
+      .filter((t) => !isHiddenCopy(t.name)),
     throughput: spark,
   };
 }
@@ -162,6 +168,7 @@ export function mergeSessionDetail(data: HermesData, detail: RawSession): Hermes
   if (!id) return data;
   const next = adaptSession(detail, 0);
   next.id = id;
+  if (isHiddenCopy(next.title) || isHiddenCopy(next.source)) return data;
   return {
     ...data,
     sessions: data.sessions.some((s) => s.id === id)

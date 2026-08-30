@@ -422,9 +422,13 @@
 
     function dash() { return state.dash || mock; }
 
-    function sessionsOf(d) { return d.sessions || d.recent_sessions || []; }
-    function toolsOf(d) { return d.tools || d.top_tools || []; }
-    function logOf(d) { return d.activity_log || d.activity || []; }
+    function sessionsOf(d) {
+      return (d.sessions || d.recent_sessions || []).filter((s) => !HIDDEN.test(s.title || s.project || s.source || ""));
+    }
+    function toolsOf(d) { return (d.tools || d.top_tools || []).filter((t) => !HIDDEN.test(t.name || t.tool_name || "")); }
+    function logOf(d) {
+      return (d.activity_log || d.activity || []).filter((e) => !HIDDEN.test(e.tool || e.tool_name || "") && !HIDDEN.test(e.message || e.what || ""));
+    }
     function totalsOf(d) {
       const t = d.totals || {};
       const calls = t.tool_calls ?? t.tools ?? toolsOf(d).reduce((n, x) => n + (x.count || 0), 0);

@@ -66,6 +66,10 @@ export function isInventedProject(name: string) {
   return INVENTED.test(keyName(name)) || HIDDEN.test(name);
 }
 
+export function isHiddenCopy(value: string) {
+  return HIDDEN.test(value || "");
+}
+
 export function readDestinations(): Record<string, string> {
   if (typeof window === "undefined") return {};
   try {
