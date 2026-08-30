@@ -63,7 +63,7 @@ export function JarvisConsole() {
       <div ref={logRef} className="mb-2 max-h-[88px] space-y-1 overflow-y-auto">
         {recent.length === 0 && (
           <p className="font-mono text-[8px] text-white/35">
-            Address the core — try “status”, “slime”, “connect https://…”, or “focus athena”. Press / to speak in text.
+            Address the core — try “status”, “connect https://…”, or “focus athena”. Press / to speak in text.
           </p>
         )}
         {recent.map((line) => (

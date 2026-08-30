@@ -1,65 +1,51 @@
 # HERMES — Neural Command Center
 
-A fully working Jarvis-class command dashboard. The original Netlify mock sat empty because its live tunnel was down. This version runs a complete neural mesh on the client: live telemetry, a holographic 3D core, orbiting agents, and a command layer you can type or speak to.
+Jarvis-class command glass for the work your Hermes agent already publishes.
 
-## What you get
+## If you just want the Netlify file
 
-- **Jarvis cognitive layer** — Ask for status, vitals, sessions, projects, or `focus athena`. Optional voice in and out (browser speech APIs).
-- **Holographic neural core** — React Three Fiber scene with custom shaders, bloom, HUD rings, synaptic pulses, and clickable agent nodes.
-- **Live command surface** — Sessions, tokens, calls, cost, cognitive load, system gauges, radar, throughput, and a streaming activity feed that keep moving.
-- **Projects, sessions, activity** — Working views with real sample programmes and session detail popovers.
+Use **`standalone/index.html`**. That is one HTML file you can:
 
-No API keys. When your Hermes agent is offline the core stays alive on a local mesh. When slime arrives, the mesh yields to the live feed.
+- upload to the same Netlify site she already shares (replace the old HUD)
+- hand to Hermes so she can see how the glass is built
+- open in a browser with no build step
 
-## Sync your Hermes agent
+She keeps the same feed she uses today:
 
-The original Netlify HUD expected the NDS agent here:
+- `GET /api/dashboard.json`
+- `GET /api/deliverables`
+- `GET /api/session/:id`
+- `WS /ws`
 
-- `GET /api/dashboard.json` — totals, sessions, tools, system, cognitive load, activity
-- `GET /api/deliverables` — projects
-- `GET /api/session/:id` — session detail
-- `WS /ws` — the same JSON as a live slime frame
+On Netlify the page calls her usual tunnel. On localhost or a Cloudflare tunnel it talks to the page origin (the agent herself). Details: `standalone/README.md`.
 
-This dashboard speaks that contract in both directions.
+A copy is also served from this app at `/hermes.html`.
 
-**Pull (same as before).** Point the uplink at your agent tunnel or localhost:
+## Where to create the GitHub repo
 
-```bash
-cp .env.example .env.local
-# set NEXT_PUBLIC_HERMES_ORIGIN=https://your-tunnel.trycloudflare.com
-npm run dev
-```
+You do **not** start on github.com. In **this Cursor agent chat**, look at the top of the conversation (or the project header) for the **Create repo** pill.
 
-Or paste the URL in **Hermes agent uplink** and hit Connect. Jarvis also accepts `connect https://…` and `slime`.
+1. Click **Create repo**.
+2. Connect GitHub if Cursor asks.
+3. Name it (for example `hermes-neural-command`).
 
-**Push.** Have the agent POST snapshots here (CORS is open):
+That publishes this project to your GitHub account. I cannot create that repo from here because this session has no GitHub login. After the pill runs, I can keep pushing updates to it.
 
-```bash
-curl -X POST http://127.0.0.1:43177/api/ingest \
-  -H 'Content-Type: application/json' \
-  -d '{"slime":{"totals":{"sessions":12,"tool_calls":880},"cognitive_load":61}}'
-```
+## Next.js app (this repo)
 
-Raw `dashboard.json` bodies work too, or `{ "type": "slime", "payload": { … } }`.
-
-The footer shows `WebSocket slime`, `Polling slime`, `Ingest slime`, or `Local mesh`.
-
-## Run locally
+Full TypeScript version of the same glass: holographic core, Jarvis, live uplink, local mesh if she is offline.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://127.0.0.1:43177](http://127.0.0.1:43177).
+Open http://127.0.0.1:43177. Paste her tunnel in **Hermes uplink**, or set `NEXT_PUBLIC_HERMES_ORIGIN` in `.env.local`.
 
 ## Talk to Jarvis
 
-- Press `/` and type a command
-- Try `status`, `slime`, `connect https://…`, `system`, `projects`, `focus athena`
-- Use the mic to speak a command (Chrome / Edge)
-- Toggle the speaker to hear replies
+Press `/` and try `status`, `projects`, `connect https://…`, `focus athena`.
 
 ## Stack
 
-Next.js, TypeScript, Tailwind, shadcn/ui, React Three Fiber, Drei, and postprocessing bloom.
+Next.js, TypeScript, Tailwind, shadcn/ui, React Three Fiber. The Netlify drop-in is plain HTML + Three.js from a CDN.

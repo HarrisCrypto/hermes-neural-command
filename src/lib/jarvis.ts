@@ -18,7 +18,7 @@ export function interpretCommand(
   if (/\b(help|commands|what can you)\b/.test(s)) {
     return {
       reply:
-        "You can ask for a status report, system vitals, cognitive load, sessions, or projects. Say focus and an agent name to lock the core. Boost or standby changes throughput. Mute and speak control my voice. Say connect and a URL to lock onto your Hermes agent slime feed.",
+        "You can ask for a status report, system vitals, cognitive load, sessions, or projects. Say focus and an agent name to lock the core. Boost or standby changes throughput. Mute and speak control my voice. Say connect and a URL to lock onto your Hermes agent.",
     };
   }
 
@@ -67,11 +67,11 @@ export function interpretCommand(
   if (/\b(connect|uplink)\b/.test(s)) {
     const url = q.match(/https?:\/\/[^\s]+/i)?.[0];
     if (url) {
-      return { reply: `Locking the uplink onto ${url}. I will take slime from your Hermes agent as soon as it answers.`, connectOrigin: url };
+      return { reply: `Locking the uplink onto ${url}. I will take her live work as soon as the agent answers.`, connectOrigin: url };
     }
     return {
       reply: feed?.live
-        ? `Already on the slime uplink via ${feed.kind} at ${feed.origin}.`
+        ? `Already on the Hermes uplink via ${feed.kind} at ${feed.origin}.`
         : `No origin in that command. Paste the agent URL — connect https://your-tunnel.trycloudflare.com`,
     };
   }
@@ -80,11 +80,11 @@ export function interpretCommand(
     return { reply: "Dropping the agent uplink. I will keep the core alive on the local mesh.", disconnect: true };
   }
 
-  if (/\b(slime|uplink|data source|hermes agent)\b/.test(s)) {
+  if (/\b(uplink|data source|hermes agent)\b/.test(s)) {
     return {
       reply: feed?.live
-        ? `Slime is live over ${feed.kind}. Origin ${feed.origin}. Sessions ${data.totals.sessions}, calls ${fmt(data.totals.calls)}.`
-        : `No slime on the wire. Your Hermes agent should publish /api/dashboard.json and /ws, or POST snapshots to /api/ingest. Currently on the local mesh.`,
+        ? `Hermes feed is live over ${feed.kind}. Origin ${feed.origin}. Sessions ${data.totals.sessions}, calls ${fmt(data.totals.calls)}.`
+        : `The agent is not on the wire. She should keep publishing /api/dashboard.json and /ws, the same as the Netlify HUD. Currently on the local mesh.`,
     };
   }
 

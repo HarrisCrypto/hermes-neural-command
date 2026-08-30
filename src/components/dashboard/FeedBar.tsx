@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { useHermes } from "@/lib/store";
 
 const LABELS = {
-  websocket: "WebSocket slime",
-  polling: "Polling slime",
-  ingest: "Ingest slime",
+  websocket: "WebSocket",
+  polling: "Polling agent",
+  ingest: "Pushed feed",
   mesh: "Local mesh",
 } as const;
 
