@@ -224,7 +224,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
-    const HERMES_DEFAULT_ORIGIN = "https://area-interval-possession-options.trycloudflare.com";
+    const HERMES_DEFAULT_ORIGIN = "https://builders-adjustments-costs-diagram.trycloudflare.com";
     const KEY = "hermes.origin";
     const $ = (id) => document.getElementById(id);
 
@@ -278,11 +278,11 @@
 
     const DEST_KEY = "hermes.destinations";
     const HOUSE = [
-      { id: "purr", name: "PURR therapy", category: "Therapy", description: "The PURR therapy programme — sessions, notes, and the channel.", progress: 68, href: "" },
-      { id: "pipeline", name: "Content pipeline", category: "Media", description: "The content line: ideas through edit and publish.", progress: 54, href: "" },
-      { id: "hermes", name: "Hermes", category: "Agent", description: "Hermes herself — the agent that runs this house.", progress: 81, href: "" },
-      { id: "dashboard", name: "Dashboard", category: "Command", description: "This command glass. The neural HUD for the live work.", progress: 73, href: "https://harriscrypto.github.io/hermes-neural-command/" },
-      { id: "sams", name: "Sam's window washing", category: "Business", description: "Sam's window washing — jobs, clients, and the site.", progress: 47, href: "" },
+      { id: "purr", name: "PURR therapy", category: "Therapy", description: "The PURR therapy programme — sessions, notes, and the channel.", progress: 68, href: "https://youtube.com/channel/UC79ffRbvUaoUybeWTTfVx8A" },
+      { id: "pipeline", name: "Content pipeline", category: "Media", description: "The content line: ideas through edit and publish.", progress: 54, href: "https://github.com/EtherEternalHermes/shorts-batch-pipeline" },
+      { id: "hermes", name: "Hermes", category: "Agent", description: "Hermes herself — the agent that runs this house.", progress: 81, href: "https://superb-conkies-896c4b.netlify.app" },
+      { id: "dashboard", name: "Dashboard", category: "Command", description: "This command glass. The neural HUD for the live work.", progress: 73, href: "https://superb-conkies-896c4b.netlify.app" },
+      { id: "sams", name: "Sam's window washing", category: "Business", description: "Sam's window washing — jobs, clients, and the site.", progress: 47, href: "https://sams-window-wash.netlify.app" },
     ];
     const INVENTED = /^(atlas|atlas reasoner|hermes nds|hermes neural core|iris perception stack|mnemosyne vault|hephaestus forge|argus watchnet)$/i;
     const HIDDEN = /slime/i;
@@ -532,9 +532,25 @@
       }
 
       const node = c.nodes.find((n) => includesName(s, n.label));
-      if (node && /focus|open|show|about|what|how/.test(s)) {
+      if (node && /focus|open|show|about|what|how|tell me/.test(s)) {
         pinNode(node);
-        return `${node.label} is a ${node.kind} node at ${Math.round(node.load * 100)} percent load.`;
+        // Build rich rundown from project data
+        const proj = c.projects.find((p) => includesName(s, p.name));
+        const relatedSessions = c.sessions.filter((s) => includesName(s.project || s.title, node.label));
+        const relatedArtifacts = (state.projects.length ? [] : []).concat(
+          c.d.deliverables || []
+        ).filter((a) => a.parent_project && includesName(a.parent_project, node.label));
+        let rundown = `${node.label} — ${node.kind}. ${node.detail || proj?.description || ""}`;
+        if (proj?.progress) rundown += ` ${proj.progress}% complete.`;
+        if (proj?.category) rundown += ` Category: ${proj.category}.`;
+        if (proj?.href) rundown += ` Destination: ${linkLabel(proj.href)}.`;
+        if (relatedSessions.length) {
+          rundown += ` ${relatedSessions.length} related session${relatedSessions.length > 1 ? "s" : ""}`;
+          const top = relatedSessions[0];
+          rundown += ` — latest: "${top.title || top.project}" (${top.model || "core"}, ${compact(top.tool_calls)} calls, ${money(top.cost)}).`;
+        }
+        if (node.load) rundown += ` Cortical load: ${Math.round(node.load * 100)}%.`;
+        return rundown;
       }
 
       if (/project|programme|program|deliverable|what are we (building|working)|on the board/.test(s)) {
@@ -1181,7 +1197,15 @@
     $("askForm").onsubmit = (e) => { e.preventDefault(); const v = $("ask").value.trim(); if (v) { ask(v); $("ask").value = ""; } };
     document.body.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-ask]");
-      if (btn) ask(btn.getAttribute("data-ask"));
+      if (btn) {
+        ask(btn.getAttribute("data-ask"));
+        // If inside a programme tile with a link, open it too
+        const tile = btn.closest(".tile");
+        if (tile) {
+          const link = tile.querySelector(".tile-go");
+          if (link && link.href) openHref(link.href);
+        }
+      }
     });
 
     $("uplinkBtn").onclick = () => $("uplink").classList.toggle("open");
@@ -1243,3 +1267,4 @@
   </script>
 </body>
 </html>
+
