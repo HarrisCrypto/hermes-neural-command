@@ -1112,9 +1112,28 @@
 
     /* ---------------- jarvis voice ---------------- */
     const synth = window.speechSynthesis;
+    let audioPlayer = null;
     function speakLine(text) {
       $("heard").textContent = text;
       if ($("heard") && !state.held) $("heard").dataset.idle = "1";
+      // Try Edge TTS via server first (natural male voice)
+      if (state.origin) {
+        const ttsUrl = state.origin.replace(/\/$/, "") + "/api/tts?text=" + encodeURIComponent(text.substring(0, 480));
+        if (audioPlayer) { audioPlayer.pause(); audioPlayer = null; }
+        synth.cancel();
+        const audio = new Audio();
+        audioPlayer = audio;
+        audio.src = ttsUrl;
+        audio.volume = 0.92;
+        audio.play().catch(function() {
+          // Fallback to browser TTS
+          fallbackTTS(text);
+        });
+        return;
+      }
+      fallbackTTS(text);
+    }
+    function fallbackTTS(text) {
       if (!synth) return;
       synth.cancel();
       const u = new SpeechSynthesisUtterance(text);
