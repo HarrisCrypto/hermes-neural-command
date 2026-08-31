@@ -1118,9 +1118,12 @@
       if (!synth) return;
       synth.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      u.rate = 0.96; u.pitch = 0.92;
+      u.rate = 0.88; u.pitch = 0.85;
+      u.volume = 0.92;
       const voices = synth.getVoices();
-      u.voice = voices.find((v) => /Daniel|Samantha|Karen|Google UK English Female/i.test(v.name)) || voices[0];
+      u.voice = voices.find((v) => /Google UK English Male|Daniel|Microsoft David|Alex|Fred|Google US English|native/i.test(v.name))
+        || voices.find((v) => /male|Male|UK|English/.test(v.name))
+        || voices[0];
       synth.speak(u);
     }
     function ask(cmd) {
