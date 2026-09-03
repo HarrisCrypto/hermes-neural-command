@@ -59,6 +59,9 @@
   <div class="hero-fallback" aria-hidden="true"></div>
   <canvas id="drive" aria-hidden="true"></canvas>
   <div class="hero-veil" aria-hidden="true"></div>
+  <div class="hero-grain" aria-hidden="true"></div>
+  <div class="hero-letterbox top" aria-hidden="true"></div>
+  <div class="hero-letterbox bot" aria-hidden="true"></div>
 
   <svg class="bonnet" viewBox="0 0 1600 300" aria-hidden="true" preserveAspectRatio="xMidYMax meet">
     <defs>
@@ -87,7 +90,7 @@
     </div>
   </div>
 
-  <div class="scroll-hint" aria-hidden="true"><span></span>Keep driving</div>
+  <div class="scroll-hint" aria-hidden="true"><span></span>Steer with your mouse · scroll to go on</div>
 </header>
 
 <main id="main">
@@ -442,14 +445,12 @@
 
 <script>
 (function () {
-  /* WebGL lane is progressive enhancement. Painted fallback + bonnet show
-     immediately; Three.js boots on interaction, idle, or after 1.2s. */
+  /* Cinematic drive: painted fallback + bonnet paint immediately.
+     Three.js starts as soon as the document is interactive so the
+     first viewport feels like entering a film, not a brochure. */
   function loadDrive() {
     if (window.__ujDriveLoading) return;
     window.__ujDriveLoading = true;
-    ['scroll','pointerdown','pointermove','touchstart','keydown'].forEach(function (ev) {
-      window.removeEventListener(ev, loadDrive, true);
-    });
     var s = document.createElement('script');
     s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
     s.onload = function () {
@@ -457,19 +458,13 @@
       d.src = 'drive.js';
       document.body.appendChild(d);
     };
-    document.body.appendChild(s);
+    document.head.appendChild(s);
   }
-  function arm() {
-    ['scroll','pointerdown','pointermove','touchstart','keydown'].forEach(function (ev) {
-      window.addEventListener(ev, loadDrive, { once: true, passive: true, capture: true });
-    });
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(function () { loadDrive(); }, { timeout: 1500 });
-    }
-    setTimeout(loadDrive, 1200);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadDrive);
+  } else {
+    loadDrive();
   }
-  if (document.readyState === 'complete') arm();
-  else window.addEventListener('load', arm);
 })();
 </script>
 <a class="sticky-call" href="tel:+14086861101">Call (408) 686-1101</a>
