@@ -321,13 +321,18 @@
       </div>
     </div>
 
-    <!-- Quote form: wired for Formspree. Replace YOUR_FORM_ID after creating a form at formspree.io.
+    <!-- Quote form: FormSubmit delivers to info@unionjack.com (proposed address) with no signup.
+         First submit may require confirming the email inbox. Swap to Formspree later if preferred.
          data-netlify attributes also work if you deploy this folder to Netlify. -->
     <form class="quote-form" id="quote" name="quote" method="POST"
-          action="https://formspree.io/f/YOUR_FORM_ID"
+          action="https://formsubmit.co/info@unionjack.com"
           enctype="multipart/form-data"
           data-netlify="true" netlify-honeypot="bot-field">
       <input type="hidden" name="form-name" value="quote">
+      <input type="hidden" name="_subject" value="Union Jack quote request">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_next" value="quote-thanks.html">
       <p class="hp">
         <label>Leave blank <input name="bot-field" tabindex="-1" autocomplete="off"></label>
       </p>

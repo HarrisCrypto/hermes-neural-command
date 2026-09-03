@@ -12,13 +12,9 @@ Open http://127.0.0.1:8000/
 
 ## Quote form
 
-The homepage form posts to Formspree. Create a form at https://formspree.io and replace `YOUR_FORM_ID` in `index.html`:
+The homepage form posts to [FormSubmit](https://formsubmit.co) at `info@unionjack.com` (no account needed). The first submission may ask you to confirm that inbox.
 
-```html
-action="https://formspree.io/f/YOUR_FORM_ID"
-```
-
-The same form also includes Netlify Forms attributes (`data-netlify="true"`) if you deploy this folder to Netlify.
+To switch to Formspree later, change the form `action` in `index.html`. Netlify Forms attributes are also present if you deploy to Netlify.
 
 ## Proposed email
 
