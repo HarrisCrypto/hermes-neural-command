@@ -1,4 +1,3 @@
-document.getElementById('mark').src = 'logo.png';
 (function () {
   'use strict';
   var canvas = document.getElementById('drive');
@@ -8,9 +7,10 @@ document.getElementById('mark').src = 'logo.png';
 
   var renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
+    var lo = window.innerWidth < 700 || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !lo, alpha: false, powerPreference: 'high-performance' });
   } catch (e) { return; }                     // no WebGL → painted fallback stays
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lo ? 1 : 1.5));
   renderer.setSize(window.innerWidth, window.innerHeight, false);
 
   var scene = new THREE.Scene();
@@ -107,7 +107,7 @@ document.getElementById('mark').src = 'logo.png';
   var world = new THREE.Group();
   scene.add(world);
 
-  var HEDGE_N = 300;
+  var HEDGE_N = 140;
   var hedge = scatter(
     new THREE.SphereGeometry(1, 6, 5),
     new THREE.MeshLambertMaterial({ color: 0x2F4A26 }),
@@ -122,7 +122,7 @@ document.getElementById('mark').src = 'logo.png';
     });
   world.add(hedge);
 
-  var TREE_N = 90;
+  var TREE_N = 48;
   var trunks = scatter(
     new THREE.CylinderGeometry(0.22, 0.34, 7, 5),
     new THREE.MeshLambertMaterial({ color: 0x4A3A2A }),
@@ -148,7 +148,7 @@ document.getElementById('mark').src = 'logo.png';
   world.add(canopy);
 
   /* fence posts give speed a readable rhythm */
-  var POST_N = 220;
+  var POST_N = 100;
   var posts = scatter(
     new THREE.BoxGeometry(0.13, 1.15, 0.13),
     new THREE.MeshLambertMaterial({ color: 0x6B5B44 }),
@@ -186,7 +186,16 @@ document.getElementById('mark').src = 'logo.png';
     target = 26 + Math.min(d / 40, 26);
   }, { passive: true });
 
+  var raf = 0, running = false;
+
   function frame() {
+    raf = 0;
+    if (reduced) {
+      renderer.render(scene, camera);
+      return;
+    }
+    if (document.hidden) { running = false; return; }
+
     var dt = Math.min(clock.getDelta(), 0.05);
     speed += (target - speed) * dt * 1.4;
     travelled += speed * dt;
@@ -207,8 +216,24 @@ document.getElementById('mark').src = 'logo.png';
     camera.rotation.z = -pointer * 0.03 + Math.sin(travelled * 0.05) * 0.006;
 
     renderer.render(scene, camera);
-    if (!reduced) requestAnimationFrame(frame);
+    running = true;
+    raf = requestAnimationFrame(frame);
   }
+
+  function start() {
+    if (reduced || document.hidden) { frame(); return; }
+    if (!raf) raf = requestAnimationFrame(frame);
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0; running = false;
+    } else {
+      clock.getDelta();
+      start();
+    }
+  });
 
   window.addEventListener('resize', function () {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -216,5 +241,5 @@ document.getElementById('mark').src = 'logo.png';
     renderer.setSize(window.innerWidth, window.innerHeight, false);
   });
 
-  frame();                       /* reduced motion → renders one still frame */
+  start();                       /* reduced motion → renders one still frame */
 })();

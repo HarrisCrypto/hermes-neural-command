@@ -19,10 +19,13 @@
 <meta property="og:description" content="Concours-level restoration of Jaguar, MG, Triumph, Austin-Healey and Mini. Family-run since 1988.">
 <meta property="og:url" content="https://www.unionjack.com/">
 <meta name="theme-color" content="#12203F">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="preload" href="logo.png" as="image">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
 
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -325,8 +328,8 @@
           enctype="multipart/form-data"
           data-netlify="true" netlify-honeypot="bot-field">
       <input type="hidden" name="form-name" value="quote">
-      <p class="visually-hidden" style="position:absolute;left:-9999px" aria-hidden="true">
-        <label>Leave blank <input name="bot-field"></label>
+      <p class="hp">
+        <label>Leave blank <input name="bot-field" tabindex="-1" autocomplete="off"></label>
       </p>
       <div class="row two-col">
         <div>
@@ -430,7 +433,34 @@
 }
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="drive.js" defer></script>
+<script>
+(function () {
+  /* WebGL lane is progressive enhancement. The painted fallback + bonnet
+     show immediately; Three.js boots on first interaction or after 8s. */
+  function loadDrive() {
+    if (window.__ujDriveLoading) return;
+    window.__ujDriveLoading = true;
+    ['scroll','pointerdown','pointermove','touchstart','keydown'].forEach(function (ev) {
+      window.removeEventListener(ev, loadDrive, true);
+    });
+    var s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+    s.onload = function () {
+      var d = document.createElement('script');
+      d.src = 'drive.js';
+      document.body.appendChild(d);
+    };
+    document.body.appendChild(s);
+  }
+  function arm() {
+    ['scroll','pointerdown','pointermove','touchstart','keydown'].forEach(function (ev) {
+      window.addEventListener(ev, loadDrive, { once: true, passive: true, capture: true });
+    });
+    setTimeout(loadDrive, 8000);
+  }
+  if (document.readyState === 'complete') arm();
+  else window.addEventListener('load', arm);
+})();
+</script>
 </body>
 </html>
