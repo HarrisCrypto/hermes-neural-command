@@ -1,32 +1,47 @@
-# Union Jack British Auto Restoration — static site
+# Union Jack British Auto Restoration — site
 
-Standalone marketing site for Union Jack (San Martin, CA). Plain HTML, CSS and one Three.js country-lane WebGL scene. No build step. Built against the SEO/AEO brief: answer-first copy, marque pages, schema, FAQ, Process, Services, Reviews, Careers, Journal.
+Static marketing site for Union Jack (San Martin, CA), built against the SEO/AEO brief and the full Grok Cursor prompt.
 
-## Local preview
+## Run
 
 ```bash
+# simple (no motion modules)
 python3 -m http.server 8000
+
+# recommended (Vite + Lenis/GSAP)
+npm install
+npm run dev      # http://127.0.0.1:5173
+npm run build    # dist/
 ```
 
-Open http://127.0.0.1:8000/
+## Hero approach (Task 2)
 
-## Site map
+Real-time photoreal Three.js (GLTF roadster + HDRI + GTAO + motion blur + DoF) cannot honestly hit the **60fps / LCP &lt; 2.5s / &lt;8MB** budget on an M1 Air without licensed models, KTX2 textures, and weeks of art direction — and we still lack a licensed E-Type/Healey/MGA GLTF.
 
-- `index.html` — full-screen interactive drive hero + marque plates + quote form
-- Marque pages — Jaguar, MG, Triumph, Austin-Healey, Mini, Morris Minor, American classics, other British
-- `services.html` + Engine / Paint / Upholstery / Electrical
-- `process.html`, `faq.html`, `reviews.html`, `careers.html`, `journal.html`
+Per the prompt’s explicit alternative (Apple-style), the shipped hero is a **photoreal pre-rendered cinematic video loop** with an immediate poster swap:
 
-## Quote form
+- Poster paints first → video autoplays muted when ready
+- `prefers-reduced-motion` keeps the poster
+- Higgsfield MCP can replace `media/drive-hero.mp4` with a British-marque-specific clip once Desktop auth is complete
 
-The homepage form posts to [FormSubmit](https://formsubmit.co) at `info@unionjack.com` (no account needed). The first submission may ask you to confirm that inbox.
+Legacy `drive.js` (r128 procedural) is retained only as archive; it is not loaded on the homepage.
 
-To switch to Formspree later, change the form `action` in `index.html`. Netlify Forms attributes are also present if you deploy to Netlify.
+## Design system
 
-## Proposed email
+Badge-derived tokens: `--ink #12203F`, `--brass #B8912E`, `--paper #EDE9DF`, `--green #12352A`, EB Garamond / IBM Plex Sans. Marques as build plates, not cards.
 
-`info@unionjack.com` is proposed for the redesign. Confirm before go-live; do not silently revert to the old SBCGlobal address.
+## Content / SEO / AEO
 
-## Own repo
+- No invented car/owner stories; Concours spelling; NAP on Depot Ave; `info@unionjack.com` flagged as proposed
+- Unique titles/descriptions/canonicals; `tel:` links; FAQ HTML ↔ schema parity; robots allow AI bots
+- Marque pages + Mini + American classics + Journal + Process/FAQ/Reviews/Careers/Services
 
-This site should live in its own GitHub repository (not under Hermes Neural Command). Copy this `unionjack-site/` folder into that repo when ready.
+## Before production
+
+- Host photos on own domain (still Wix CDN hotlinks)
+- Drop `.html` via host config
+- Live Google review feed; true same-car before/after frames from Marcello
+- Vector logo; licence any future 3D/HDRI assets
+- Confirm `info@unionjack.com`
+- Authenticate Higgsfield in Cursor Desktop for marque-accurate hero film
+- Grant Cursor GitHub App write on `Union-Jack-Rebuild-` for Pages deploy
