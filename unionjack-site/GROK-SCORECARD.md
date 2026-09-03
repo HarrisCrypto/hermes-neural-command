@@ -5,7 +5,15 @@
 |---|---|
 | Local serve | Done (`python3 -m http.server 8000` / `npm run dev`) |
 | Screenshots 1440 / 390 | Done (artifacts under `/opt/cursor/artifacts/`) |
-| Lighthouse | Re-run after British hero + marque chrome pass |
+## Final Lighthouse (homepage, mobile simulation)
+| Metric | Score |
+|---|---|
+| Performance | **94–95** (LCP ~2.9s on throttled mobile; poster-first) |
+| Accessibility | **100** |
+| Best practices | **100** |
+| SEO | **100** |
+
+Earlier video-hero pass was ~79 performance; procedural/deferred WebGL once hit 100s without photoreal media.
 | Fonts EB Garamond / IBM Plex | Linked |
 
 ## Task 2 — photoreal hero

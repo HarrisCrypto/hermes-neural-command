@@ -15,7 +15,6 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#12203F">
 <link rel="icon" href="favicon.ico" sizes="any">
-<link rel="preload" href="logo.png" as="image">
 <link rel="preload" href="media/drive-poster.jpg" as="image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +28,7 @@
 <header class="nav" id="nav">
   <div class="nav-inner">
     <a class="nav-logo" href="index.html" aria-label="Union Jack home">
-      <img src="logo.png" width="120" height="60" alt="Union Jack">
+      <img src="logo.png" width="320" height="117" alt="Union Jack">
     </a>
     <nav class="nav-links" aria-label="Primary">
       <a href="services.html">Services</a>
@@ -74,11 +73,14 @@
       aria-hidden="true">
       <source src="media/drive-hero.mp4" type="video/mp4">
     </video>
-    <img class="hero-poster" src="media/drive-poster.jpg" alt="British racing green classic roadster on a country lane at golden hour" width="1920" height="1080" decoding="async" fetchpriority="high">
+    <picture class="hero-poster-pic">
+      <source srcset="media/drive-poster.webp" type="image/webp">
+      <img class="hero-poster" src="media/drive-poster.jpg" alt="British racing green classic roadster on a country lane at golden hour" width="1600" height="900" decoding="async" fetchpriority="high">
+    </picture>
   </div>
   <div class="hero-shade" aria-hidden="true"></div>
   <div class="hero-copy">
-    <img class="hero-badge" src="logo.png" width="200" height="100" alt="Union Jack British Auto Restoration and Repair, established 1988">
+    <img class="hero-badge" src="logo.png" width="320" height="117" alt="Union Jack British Auto Restoration and Repair, established 1988">
     <h1>Union Jack</h1>
     <p class="hero-line">British sports cars, restored properly — San Martin, California since 1988.</p>
     <div class="hero-actions">
@@ -329,7 +331,7 @@
   import './src/site.js'
 
   const video = document.getElementById('heroVideo')
-  const poster = document.querySelector('.hero-poster')
+  const poster = document.querySelector('.hero-poster-pic') || document.querySelector('.hero-poster')
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   if (video && !reduced) {
@@ -337,7 +339,10 @@
       poster?.classList.add('is-hidden')
       video.classList.add('is-playing')
     }
-    video.play()?.then(markPlaying).catch(() => {})
+    // Defer video start slightly so poster wins LCP
+    const start = () => video.play()?.then(markPlaying).catch(() => {})
+    if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1200 })
+    else setTimeout(start, 400)
     video.addEventListener('playing', markPlaying)
   }
 </script>

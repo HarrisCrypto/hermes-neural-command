@@ -96,13 +96,15 @@ p{margin:0 0 1em;max-width:62ch}
   isolation:isolate;
 }
 .hero-media{position:absolute;inset:0;z-index:0}
-.hero-video,.hero-poster{
+.hero-video,.hero-poster,.hero-poster-pic{
   width:100%;height:100%;object-fit:cover;object-position:center
 }
+.hero-poster-pic{position:absolute;inset:0;display:block}
+.hero-poster-pic img{width:100%;height:100%;object-fit:cover}
 .hero-video{opacity:0;transition:opacity 1.2s ease}
 .hero-video.is-playing{opacity:1}
 .hero-poster{position:absolute;inset:0;transition:opacity 1s ease}
-.hero-poster.is-hidden{opacity:0;pointer-events:none}
+.hero-poster-pic.is-hidden,.hero-poster.is-hidden{opacity:0;pointer-events:none}
 .hero-shade{
   position:absolute;inset:0;z-index:1;pointer-events:none;
   background:
@@ -112,10 +114,15 @@ p{margin:0 0 1em;max-width:62ch}
 .hero-copy{
   position:relative;z-index:2;
   width:var(--shell);margin-inline:auto;
-  padding:clamp(6rem,14vh,9rem) 0 clamp(4.5rem,10vh,6.5rem);
+  padding:clamp(6rem,14vh,9rem) 0 clamp(5.5rem,12vh,7rem);
+}
+@media(max-width:760px){
+  .hero-copy{padding-bottom:6.5rem}
+  .hero-badge{width:min(160px,46vw)}
+  .hero h1{font-size:clamp(2.6rem,14vw,3.6rem)}
 }
 .hero-badge{
-  width:min(200px,42vw);margin:0 0 1.5rem;
+  width:min(200px,42vw);height:auto;margin:0 0 1.5rem;
   filter:drop-shadow(0 8px 28px rgba(0,0,0,.45));
   animation:rise .9s ease both;
 }
@@ -180,7 +187,7 @@ p{margin:0 0 1em;max-width:62ch}
 .section-foot{margin-top:2rem}
 .eyebrow{
   font-size:.9rem;letter-spacing:.02em;
-  color:var(--brass-d);margin:0 0 .85rem;font-weight:500
+  color:#6B5418;margin:0 0 .85rem;font-weight:500
 }
 .eyebrow.light{color:var(--brass-l)}
 .eyebrow.dark{color:#3A2E0C}
@@ -320,7 +327,8 @@ p{margin:0 0 1em;max-width:62ch}
 .foot-grid{display:grid;gap:1.75rem}
 @media(min-width:760px){.foot-grid{grid-template-columns:1.2fr 1fr 1.2fr}}
 .foot-links{display:flex;flex-wrap:wrap;gap:.65rem 1.1rem}
-.foot-fine{margin-top:2rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.08);font-size:.82rem}
+.foot-fine a{color:#D5DCE8;text-decoration:underline;text-underline-offset:2px}
+.foot-fine a:hover{color:var(--brass-l)}
 
 /* Sticky call */
 .sticky-call{
