@@ -173,7 +173,7 @@ body.is-scrolled .chrome{
 .btn-ghost{border-color:rgba(255,255,255,.5);color:#fff}
 .btn-ghost:hover{background:rgba(255,255,255,.12);border-color:#fff}
 
-.scroll-hint{position:absolute;left:50%;bottom:1.1rem;translate:-50% 0;z-index:4;
+.scroll-hint{position:absolute;left:50%;bottom:clamp(2.6rem,6vh,3.8rem);translate:-50% 0;z-index:4;
   color:rgba(255,255,255,.72);font-size:.8rem;letter-spacing:.06em;display:flex;flex-direction:column;
   align-items:center;gap:.4rem}
 .scroll-hint span{width:1px;height:34px;background:linear-gradient(rgba(255,255,255,.7),transparent);
