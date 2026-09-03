@@ -43,56 +43,126 @@ img{max-width:100%;display:block}
 .topnav nav a{color:#C3CDDD;text-decoration:none}
 .topnav nav a:hover{color:var(--brass-l)}
 
+/* ---------- cinema landing chrome (minimal over the drive) ---------- */
+.cinema-curtain{
+  position:fixed;inset:0;z-index:100;background:#05080F;display:grid;place-items:center;
+  transition:opacity 1.1s ease, visibility 1.1s
+}
+.cinema-curtain.is-done{opacity:0;visibility:hidden;pointer-events:none}
+.cinema-card{text-align:center;color:#EDE4D2;padding:2rem;opacity:0;animation:cardIn 1.2s ease .25s forwards}
+.cinema-eyebrow{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--brass-l);margin:0 0 1rem}
+.cinema-title{font-family:var(--serif);font-size:clamp(2.8rem,9vw,5.5rem);line-height:1;margin:0;color:#fff;
+  letter-spacing:-.02em}
+.cinema-line{font-size:clamp(1rem,2vw,1.2rem);margin:1rem 0 0;color:#C3B8A2;letter-spacing:.04em}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){
+  .cinema-card{animation:none;opacity:1}
+  .cinema-curtain{transition-duration:.2s}
+}
+
+.chrome{
+  position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;gap:1rem;
+  padding:.85rem var(--pad);pointer-events:none;opacity:0;transform:translateY(-8px);
+  transition:opacity .6s ease .2s, transform .6s ease .2s
+}
+.drive-live .chrome, .cinema-curtain.is-done ~ .chrome{opacity:1;transform:none}
+.chrome > *{pointer-events:auto}
+.chrome-brand{font-family:var(--serif);font-size:1.15rem;color:#fff;text-decoration:none;
+  text-shadow:0 2px 12px rgba(0,0,0,.55);margin-right:auto}
+.chrome-menu,.chrome-call{
+  font:inherit;font-size:.88rem;font-weight:500;cursor:pointer;
+  background:rgba(5,8,15,.45);color:#EDE4D2;border:1px solid rgba(255,255,255,.28);
+  padding:.45rem .9rem;backdrop-filter:blur(8px)
+}
+.chrome-call{background:var(--brass);color:#16130A;border-color:var(--brass);text-decoration:none}
+.chrome-call:hover{background:var(--brass-l)}
+.chrome-nav{
+  position:absolute;top:calc(100% + .4rem);right:var(--pad);background:rgba(8,12,22,.94);
+  border:1px solid rgba(255,255,255,.12);padding:1rem 1.2rem;display:grid;gap:.55rem;
+  min-width:12rem;backdrop-filter:blur(12px)
+}
+.chrome-nav a{color:#D5DCE8;text-decoration:none;font-size:.92rem}
+.chrome-nav a:hover{color:var(--brass-l)}
+.chrome-nav[hidden]{display:none !important}
+body.is-scrolled .chrome{
+  background:linear-gradient(180deg,rgba(5,8,15,.82),rgba(5,8,15,.35) 70%,transparent)
+}
+
 /* ================= HERO ================= */
 .hero{position:relative;height:100svh;min-height:560px;overflow:hidden;background:#0B1730;isolation:isolate}
-#drive{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity 1.1s ease}
+#drive{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity 1.4s ease}
 #drive.is-live{opacity:1}
 .hero-fallback{position:absolute;inset:0;background:
   radial-gradient(120% 70% at 50% 88%,#3A4A38 0%,#20301F 45%,transparent 46%),
-  linear-gradient(#0B1730 0%,#2A3A63 45%,#B98A52 78%,#E9C489 100%);
-  transition:opacity 1.2s ease}
+  linear-gradient(#0B1730 0%,#2A3A63 40%,#C4783A 72%,#E0A056 100%);
+  transition:opacity 1.4s ease}
 .hero-fallback.is-hidden{opacity:0;pointer-events:none}
 .hero-veil{position:absolute;inset:0;background:
-  radial-gradient(140% 90% at 50% 15%,transparent 28%,rgba(6,14,32,.55) 78%,rgba(4,8,18,.82) 100%),
-  linear-gradient(180deg,rgba(4,10,24,.35) 0%,transparent 28%,transparent 62%,rgba(4,10,24,.55) 100%);
+  radial-gradient(120% 85% at 50% 40%,transparent 20%,rgba(6,14,32,.4) 70%,rgba(4,8,18,.78) 100%),
+  linear-gradient(180deg,rgba(4,10,24,.45) 0%,transparent 22%,transparent 55%,rgba(4,10,24,.5) 100%);
   pointer-events:none;z-index:1}
-/* film grain + letterbox — movie presence without cluttering copy */
-.hero-grain{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.14;mix-blend-mode:overlay;
+.hero-grain{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.16;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
-  animation:grain 0.7s steps(2) infinite}
-.hero-letterbox{position:absolute;left:0;right:0;height:clamp(1.1rem,3.2vh,2.4rem);background:#05080F;z-index:5;pointer-events:none}
+  animation:grain .65s steps(2) infinite}
+.hero-letterbox{position:absolute;left:0;right:0;height:clamp(1.25rem,3.6vh,2.6rem);background:#05080F;z-index:5;pointer-events:none}
 .hero-letterbox.top{top:0}
 .hero-letterbox.bot{bottom:0}
 @keyframes grain{0%{transform:translate(0,0)}100%{transform:translate(-1.5%,1.2%)}}
+
+.cabin{position:absolute;inset:0;z-index:2;pointer-events:none;transition:transform .12s linear}
+.cabin .pillar{position:absolute;top:0;bottom:18%;width:clamp(2.5rem,7vw,5.5rem);
+  background:linear-gradient(90deg,#05080F,transparent)}
+.cabin .pillar.left{left:0}
+.cabin .pillar.right{right:0;background:linear-gradient(270deg,#05080F,transparent)}
+.cabin .mirror{position:absolute;top:12%;width:clamp(2.2rem,4vw,3.2rem);height:clamp(1.4rem,2.4vw,2rem);
+  background:rgba(10,14,24,.75);border:1px solid rgba(196,176,122,.35);border-radius:2px}
+.cabin .mirror.left{left:clamp(3rem,8vw,6rem)}
+.cabin .mirror.right{right:clamp(3rem,8vw,6rem)}
+.cabin .dash-glow{position:absolute;left:20%;right:20%;bottom:12%;height:18%;
+  background:radial-gradient(ellipse at center,rgba(184,145,46,.12),transparent 70%)}
+
+.speed-hud{
+  position:absolute;right:var(--pad);bottom:clamp(5.5rem,14vh,8rem);z-index:4;
+  font-family:var(--serif);color:rgba(237,228,210,.82);text-align:right;
+  text-shadow:0 2px 16px rgba(0,0,0,.7);pointer-events:none;opacity:0;
+  transition:opacity .8s ease 1.2s
+}
+.drive-live .speed-hud{opacity:1}
+.speed-hud span{font-size:clamp(2rem,4vw,3rem);line-height:1;display:block}
+.speed-hud small{font-family:var(--sans);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;opacity:.7}
+
 @media(prefers-reduced-motion:reduce){
   .hero-grain{animation:none;opacity:.08}
   #drive{transition:none}
+  .cabin{transition:none}
 }
+
 .hero-inner .hero-mark,
 .hero-inner h1,
 .hero-inner .hero-sub,
 .hero-inner .hero-cta{
   opacity:0;transform:translateY(18px);
-  animation:heroIn .9s cubic-bezier(.2,.7,.2,1) forwards
+  animation:heroIn 1s cubic-bezier(.2,.7,.2,1) forwards
 }
-.hero-inner .hero-mark{animation-delay:.35s}
-.hero-inner h1{animation-delay:.55s}
-.hero-inner .hero-sub{animation-delay:.75s}
-.hero-inner .hero-cta{animation-delay:.95s}
+.hero-inner .hero-mark{animation-delay:1.5s}
+.hero-inner h1{animation-delay:1.7s}
+.hero-inner .hero-sub{animation-delay:1.9s}
+.hero-inner .hero-cta{animation-delay:2.1s}
 @keyframes heroIn{to{opacity:1;transform:none}}
 .drive-live .scroll-hint{animation:hintPulse 2.8s ease-in-out infinite}
 @keyframes hintPulse{0%,100%{opacity:.55}50%{opacity:1}}
 
 /* bonnet silhouette — you are sitting in the car */
-.bonnet{position:absolute;left:50%;bottom:-2px;translate:-50% 0;width:190%;max-width:2200px;pointer-events:none;z-index:2}
-@media(min-width:900px){.bonnet{width:125%}}
+.bonnet{position:absolute;left:50%;bottom:-2px;translate:-50% 0;width:190%;max-width:2200px;pointer-events:none;z-index:3;
+  filter:drop-shadow(0 -8px 24px rgba(0,0,0,.45));will-change:transform}
+@media(min-width:900px){.bonnet{width:128%}}
 
-.hero-inner{position:relative;z-index:3;height:100%;display:grid;align-content:end;
-  padding:0 var(--pad) clamp(3.5rem,11vh,7rem)}
-.hero-mark{width:min(300px,52vw);margin-bottom:auto;padding-top:clamp(1rem,4vh,2.5rem);
+.hero-inner{position:relative;z-index:4;height:100%;display:grid;align-content:end;
+  padding:0 var(--pad) clamp(4rem,12vh,7.5rem)}
+.hero-mark{width:min(280px,48vw);margin-bottom:auto;padding-top:clamp(3.5rem,8vh,5rem);
   filter:drop-shadow(0 6px 24px rgba(0,0,0,.55))}
-.hero h1{color:#fff;max-width:15ch;text-shadow:0 3px 30px rgba(4,10,24,.75)}
-.hero-sub{color:#EDE4D2;font-size:clamp(1.05rem,1.4vw,1.3rem);max-width:46ch;
+.hero h1{color:#fff;max-width:12ch;font-size:clamp(3rem,8.5vw,6rem);text-shadow:0 3px 30px rgba(4,10,24,.75)}
+.hero-sub{color:#EDE4D2;font-size:clamp(1.05rem,1.4vw,1.3rem);max-width:42ch;
   text-shadow:0 2px 16px rgba(4,10,24,.8);margin-top:.4em}
 .hero-cta{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:2rem}
 

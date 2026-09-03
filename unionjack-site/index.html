@@ -29,11 +29,22 @@
 
 <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="cinema-landing">
 <a class="skip" href="#main">Skip to content</a>
-<div class="topnav"><div class="wrap">
-  <a class="brand" href="index.html">Union Jack</a>
-    <nav aria-label="Primary">
+
+<!-- Movie open: black curtain → brand card → dissolve into the lane -->
+<div class="cinema-curtain" id="curtain" aria-hidden="true">
+  <div class="cinema-card">
+    <p class="cinema-eyebrow">San Martin, California · Est. 1988</p>
+    <p class="cinema-title">Union Jack</p>
+    <p class="cinema-line">British Automotive Restoration</p>
+  </div>
+</div>
+
+<header class="chrome" id="chrome">
+  <a class="chrome-brand" href="index.html" aria-label="Union Jack home">Union Jack</a>
+  <button type="button" class="chrome-menu" id="menuBtn" aria-expanded="false" aria-controls="siteMenu">Menu</button>
+  <nav class="chrome-nav" id="siteMenu" aria-label="Primary" hidden>
     <a href="services.html">Services</a>
     <a href="process.html">Process</a>
     <a href="jaguar-restoration.html">Jaguar</a>
@@ -48,10 +59,11 @@
     <a href="#quote">Quote</a>
     <a href="tel:+14086861101">Call</a>
   </nav>
-</div></div>
+  <a class="chrome-call" href="tel:+14086861101">Call</a>
+</header>
 
 <!-- ============================================================
-     HERO — full-screen procedural drive down an English lane.
+     HERO — full-screen cinematic drive down an English lane.
      Falls back to a painted gradient with no WebGL, and holds a
      still frame when the visitor prefers reduced motion.
      ============================================================ -->
@@ -63,34 +75,46 @@
   <div class="hero-letterbox top" aria-hidden="true"></div>
   <div class="hero-letterbox bot" aria-hidden="true"></div>
 
-  <svg class="bonnet" viewBox="0 0 1600 300" aria-hidden="true" preserveAspectRatio="xMidYMax meet">
+  <!-- Cabin: you are in the car looking through the windscreen -->
+  <div class="cabin" aria-hidden="true">
+    <div class="pillar left"></div>
+    <div class="pillar right"></div>
+    <div class="mirror left"></div>
+    <div class="mirror right"></div>
+    <div class="dash-glow"></div>
+  </div>
+
+  <svg class="bonnet" viewBox="0 0 1600 320" aria-hidden="true" preserveAspectRatio="xMidYMax meet">
     <defs>
       <linearGradient id="bn" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#0E1526"/><stop offset=".45" stop-color="#080D19"/>
-        <stop offset="1" stop-color="#05080F"/>
+        <stop offset="0" stop-color="#121A2C"/><stop offset=".4" stop-color="#080D19"/>
+        <stop offset="1" stop-color="#04060C"/>
       </linearGradient>
       <linearGradient id="chr" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0" stop-color="#4C5568"/><stop offset=".5" stop-color="#9AA6B8"/>
-        <stop offset="1" stop-color="#394152"/>
+        <stop offset="0" stop-color="#3A4254"/><stop offset=".5" stop-color="#C4B07A"/>
+        <stop offset="1" stop-color="#3A4254"/>
       </linearGradient>
     </defs>
-    <path d="M0,300 L0,196 C220,150 430,112 800,108 C1170,112 1380,150 1600,196 L1600,300 Z" fill="url(#bn)"/>
-    <path d="M735,112 C760,96 840,96 865,112 C845,104 755,104 735,112 Z" fill="#131C31"/>
-    <path d="M0,300 L0,236 C240,196 470,166 800,162 C1130,166 1360,196 1600,236 L1600,300 Z" fill="#070B15" opacity=".85"/>
-    <ellipse cx="800" cy="150" rx="30" ry="7" fill="#1A2436" opacity=".9"/>
+    <path d="M0,320 L0,188 C240,140 460,100 800,96 C1140,100 1360,140 1600,188 L1600,320 Z" fill="url(#bn)"/>
+    <path d="M720,104 C760,82 840,82 880,104 C845,92 755,92 720,104 Z" fill="#0E1628"/>
+    <path d="M0,320 L0,230 C260,188 500,155 800,150 C1100,155 1340,188 1600,230 L1600,320 Z" fill="#05080F" opacity=".9"/>
+    <rect x="760" y="148" width="80" height="6" rx="2" fill="url(#chr)" opacity=".85"/>
+    <ellipse cx="800" cy="142" rx="34" ry="8" fill="#1A2436"/>
   </svg>
 
+  <div class="speed-hud" aria-hidden="true"><span data-speed>0</span><small>mph</small></div>
+
   <div class="hero-inner">
-    <img class="hero-mark" id="mark" src="logo.png" alt="Union Jack British Auto Restoration and Repair, established 1988">
-    <h1>Thirty-eight years of British sports cars.</h1>
-    <p class="hero-sub">Jaguar, MG, Triumph, Austin-Healey and Mini, restored to concours standard in San Martin, California — by the same family since 1988.</p>
+    <img class="hero-mark" id="mark" src="logo.png" width="300" height="150" alt="Union Jack British Auto Restoration and Repair, established 1988">
+    <h1>Union Jack</h1>
+    <p class="hero-sub">Thirty-eight years restoring Jaguar, MG, Triumph, Austin-Healey and Mini — Concours d'Elegance standard, San Martin, California.</p>
     <div class="hero-cta">
       <a class="btn btn-solid" href="#quote">Start a quote request</a>
       <a class="btn btn-ghost" href="#work">See the work</a>
     </div>
   </div>
 
-  <div class="scroll-hint" aria-hidden="true"><span></span>Steer with your mouse · scroll to go on</div>
+  <div class="scroll-hint" aria-hidden="true"><span></span>Move to steer · scroll to keep driving</div>
 </header>
 
 <main id="main">
@@ -445,9 +469,64 @@
 
 <script>
 (function () {
-  /* Cinematic drive: painted fallback + bonnet paint immediately.
-     Three.js starts as soon as the document is interactive so the
-     first viewport feels like entering a film, not a brochure. */
+  /* Curtain open → cinematic drive. SEO content waits below the fold. */
+  var curtain = document.getElementById('curtain');
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function openCurtain() {
+    if (curtain) curtain.classList.add('is-done');
+  }
+  if (reduced) openCurtain();
+  else setTimeout(openCurtain, 2200);
+  document.addEventListener('uj:drive-ready', function () {
+    if (!reduced) setTimeout(openCurtain, 400);
+  });
+
+  /* Compact menu — keeps the first viewport a single composition */
+  var btn = document.getElementById('menuBtn');
+  var menu = document.getElementById('siteMenu');
+  if (btn && menu) {
+    btn.addEventListener('click', function () {
+      var open = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+      if (open) menu.setAttribute('hidden', '');
+      else menu.removeAttribute('hidden');
+    });
+  }
+  window.addEventListener('scroll', function () {
+    document.body.classList.toggle('is-scrolled', (window.scrollY || 0) > 40);
+  }, { passive: true });
+
+  /* Soft engine bed — only after a user gesture (autoplay policy) */
+  var audioStarted = false;
+  function startEngineBed() {
+    if (audioStarted || reduced) return;
+    audioStarted = true;
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      var ctx = new Ctx();
+      var osc = ctx.createOscillator();
+      var osc2 = ctx.createOscillator();
+      var gain = ctx.createGain();
+      var filter = ctx.createBiquadFilter();
+      osc.type = 'sawtooth'; osc.frequency.value = 42;
+      osc2.type = 'triangle'; osc2.frequency.value = 84;
+      filter.type = 'lowpass'; filter.frequency.value = 180;
+      gain.gain.value = 0;
+      osc.connect(filter); osc2.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc2.start();
+      gain.gain.linearRampToValueAtTime(0.035, ctx.currentTime + 1.5);
+      window.addEventListener('scroll', function () {
+        var sc = Math.min((window.scrollY || 0) / 600, 1);
+        gain.gain.setTargetAtTime(0.035 + sc * 0.025, ctx.currentTime, 0.3);
+        osc.frequency.setTargetAtTime(42 + sc * 18, ctx.currentTime, 0.3);
+      }, { passive: true });
+    } catch (e) {}
+  }
+  ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(function (ev) {
+    window.addEventListener(ev, startEngineBed, { once: true, passive: true });
+  });
+
   function loadDrive() {
     if (window.__ujDriveLoading) return;
     window.__ujDriveLoading = true;
@@ -460,11 +539,8 @@
     };
     document.head.appendChild(s);
   }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadDrive);
-  } else {
-    loadDrive();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadDrive);
+  else loadDrive();
 })();
 </script>
 <a class="sticky-call" href="tel:+14086861101">Call (408) 686-1101</a>
