@@ -5,8 +5,9 @@ export function initNav() {
   const drawer = document.getElementById('navDrawer')
 
   function onScroll() {
-    if (!nav || nav.classList.contains('page-nav')) return
-    nav.classList.toggle('is-solid', (window.scrollY || 0) > 24)
+    if (!nav) return
+    if (nav.classList.contains('page-nav')) return
+    nav.classList.toggle('is-solid', (window.scrollY || 0) > 40)
   }
   window.addEventListener('scroll', onScroll, { passive: true })
   onScroll()

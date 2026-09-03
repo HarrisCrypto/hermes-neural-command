@@ -8,12 +8,12 @@
 ## Final Lighthouse (homepage, mobile simulation)
 | Metric | Score |
 |---|---|
-| Performance | **94–95** (LCP ~2.9s on throttled mobile; poster-first) |
+| Performance | **88–95** (photoreal hero media; poster-first; throttled mobile LCP varies) |
 | Accessibility | **100** |
 | Best practices | **100** |
 | SEO | **100** |
 
-Earlier video-hero pass was ~79 performance; procedural/deferred WebGL once hit 100s without photoreal media.
+Polish pass: coherent British-roadster film (chase/side/bonnet), quiet hero nav, single brand lockup, atelier section voice, featured work, honest Healey progress slider, careers demoted from primary path.
 | Fonts EB Garamond / IBM Plex | Linked |
 
 ## Task 2 — photoreal hero

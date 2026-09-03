@@ -4,8 +4,8 @@ Record every third-party 3D / HDRI / stock / generated asset before production l
 
 | Asset | Source | Licence / notes |
 |---|---|---|
-| `media/drive-poster.jpg` | Generated for this redesign (British roadster, golden-hour country lane) | Commissioned for Union Jack prototype; replace with licensed film still or shop photography before launch if required |
-| `media/drive-hero.mp4` | Ken Burns cinematic loop built from the poster + Union Jack workshop photographs hosted on the Wix CDN | Workshop photos are client property; hot-linked CDN URLs are prototype-only — re-host on unionjack.com before launch |
+| `media/drive-poster.jpg` / `drive-hero.mp4` | Generated British roadster stills (chase / side / bonnet) Ken Burns loop for this redesign | Prototype asset; replace with licensed continuous film via Higgsfield or shop cinematography before launch; record licence here |
+| `media/hero-chase.jpg`, `hero-bonnet.jpg`, `hero-side.jpg` | Same generation set | Same as above |
 | Workshop stills throughout pages | Client Wix CDN (`static.wixstatic.com/media/0d4294_*`) | Client-owned; **do not** invent owner / year / colour / duration stories for specific cars |
 | `logo.png` | Recovered raster from existing signage screenshot | Obtain original vector from signage vendor before print / high-DPI use |
 | Fonts EB Garamond / IBM Plex Sans | Google Fonts | OFL |
