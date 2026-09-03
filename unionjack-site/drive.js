@@ -14,7 +14,8 @@ document.getElementById('mark').src = 'logo.png';
   renderer.setSize(window.innerWidth, window.innerHeight, false);
 
   var scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0xBCA98C, 70, 430);
+  scene.background = new THREE.Color(0xE9C489);
+  scene.fog = new THREE.Fog(0xE9C489, 90, 480);
 
   /* --- sky: painted gradient on a canvas texture --- */
   (function sky() {

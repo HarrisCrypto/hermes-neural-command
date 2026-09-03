@@ -35,8 +35,11 @@
     <a href="mg-restoration.html">MG</a>
     <a href="triumph-restoration.html">Triumph</a>
     <a href="austin-healey-restoration.html">Austin-Healey</a>
+    <a href="mini-restoration.html">Mini</a>
     <a href="morris-minor-restoration.html">Morris Minor</a>
+    <a href="american-classics-restoration.html">American classics</a>
     <a href="other-british-marques.html">Other marques</a>
+    <a href="journal.html">Journal</a>
     <a href="#faq">FAQ</a>
     <a href="#contact">Contact</a>
   </nav>
@@ -74,7 +77,7 @@
     <h1>Thirty-eight years of British sports cars.</h1>
     <p class="hero-sub">Jaguar, MG, Triumph, Austin-Healey and Mini, restored to concours standard in San Martin, California — by the same family since 1988.</p>
     <div class="hero-cta">
-      <a class="btn btn-solid" href="#contact">Start a restoration</a>
+      <a class="btn btn-solid" href="#quote">Start a quote request</a>
       <a class="btn btn-ghost" href="#work">See the work</a>
     </div>
   </div>
@@ -121,7 +124,7 @@
       <a class="plate" href="mg-restoration.html"><span class="mk">MG</span><span class="md">TC, TD, TF, MGA, MGB, MGC, Midget</span><span class="no">Restoration and repair</span></a>
       <a class="plate" href="triumph-restoration.html"><span class="mk">Triumph</span><span class="md">TR3, TR4, TR6, Spitfire, GT6, Stag</span><span class="no">Restoration and repair</span></a>
       <a class="plate" href="austin-healey-restoration.html"><span class="mk">Austin-Healey</span><span class="md">100, 3000 Mk I–III, Sprite and Bugeye</span><span class="no">Restoration and repair</span></a>
-      <a class="plate" href="other-british-marques.html"><span class="mk">Mini</span><span class="md">Austin and Morris Mini, Cooper, Cooper S</span><span class="no">Restoration and repair</span></a>
+      <a class="plate" href="mini-restoration.html"><span class="mk">Mini</span><span class="md">Austin and Morris Mini, Cooper, Cooper S</span><span class="no">Restoration and repair</span></a>
       <a class="plate" href="other-british-marques.html"><span class="mk">Morgan</span><span class="md">Plus 4, Plus 8, 4/4 — ash frame work included</span><span class="no">Restoration and repair</span></a>
       <a class="plate" href="other-british-marques.html"><span class="mk">Aston Martin</span><span class="md">DB series and later road cars</span><span class="no">Restoration and repair</span></a>
       <a class="plate" href="other-british-marques.html"><span class="mk">Rolls-Royce and Bentley</span><span class="md">Silver Cloud, Shadow, S-Type and Continental</span><span class="no">Restoration and repair</span></a>
@@ -129,7 +132,7 @@
       <a class="plate" href="other-british-marques.html"><span class="mk">Land Rover</span><span class="md">Series I, II and III, early Range Rover</span><span class="no">Restoration and repair</span></a>
       <a class="plate" href="morris-minor-restoration.html"><span class="mk">Morris Minor</span><span class="md">Saloon, Traveller, van and pick-up</span><span class="no">Restoration and repair</span></a>
       <a class="plate" href="other-british-marques.html"><span class="mk">Daimler</span><span class="md">SP250, V8 250 and Sovereign</span><span class="no">Restoration and repair</span></a>
-      <a class="plate" href="other-british-marques.html"><span class="mk">American classics</span><span class="md">Chevrolet, Ford, Plymouth, Buick — cars and trucks</span><span class="no">Restoration and repair</span></a>
+      <a class="plate" href="american-classics-restoration.html"><span class="mk">American classics</span><span class="md">Chevrolet, Ford, Plymouth, Buick — cars and trucks</span><span class="no">Restoration and repair</span></a>
     </div>
   </div>
 </section>
@@ -314,13 +317,68 @@
         <p>San Martin, Morgan Hill, Gilroy and the South Bay, out to San Francisco and Monterey Bay. Cars shipped from further afield are welcome.</p>
       </div>
     </div>
+
+    <!-- Quote form: wired for Formspree. Replace YOUR_FORM_ID after creating a form at formspree.io.
+         data-netlify attributes also work if you deploy this folder to Netlify. -->
+    <form class="quote-form" id="quote" name="quote" method="POST"
+          action="https://formspree.io/f/YOUR_FORM_ID"
+          enctype="multipart/form-data"
+          data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="quote">
+      <p class="visually-hidden" style="position:absolute;left:-9999px" aria-hidden="true">
+        <label>Leave blank <input name="bot-field"></label>
+      </p>
+      <div class="row two-col">
+        <div>
+          <label for="q-name">Your name</label>
+          <input id="q-name" name="name" type="text" autocomplete="name" required>
+        </div>
+        <div>
+          <label for="q-email">Email</label>
+          <input id="q-email" name="email" type="email" autocomplete="email" required>
+        </div>
+      </div>
+      <div class="row two-col">
+        <div>
+          <label for="q-phone">Phone</label>
+          <input id="q-phone" name="phone" type="tel" autocomplete="tel">
+        </div>
+        <div>
+          <label for="q-year">Year</label>
+          <input id="q-year" name="year" type="text" inputmode="numeric" placeholder="e.g. 1967" required>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="q-car">Car</label>
+          <input id="q-car" name="car" type="text" placeholder="Make and model — e.g. MGB GT" required>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="q-work">What do you want done?</label>
+          <textarea id="q-work" name="work" required placeholder="Full restoration, rolling restoration, structural repair, mechanical sort-out…"></textarea>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="q-photo">Photo of the car (optional)</label>
+          <input id="q-photo" name="photo" type="file" accept="image/*">
+          <p class="hint">One clear photograph helps more than a long description. Formspree file uploads need a paid plan; otherwise email the photo to info@unionjack.com.</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-solid" type="submit">Send quote request</button>
+        <p class="note">Or call <a href="tel:+14086861101">(408) 686-1101</a>. We look at the car before quoting.</p>
+      </div>
+    </form>
   </div>
 </section>
 </main>
 
 <footer>
   <div class="wrap">
-    <p style="margin:0 0 .8rem"><a href="jaguar-restoration.html">Jaguar</a> · <a href="mg-restoration.html">MG</a> · <a href="triumph-restoration.html">Triumph</a> · <a href="austin-healey-restoration.html">Austin-Healey</a> · <a href="morris-minor-restoration.html">Morris Minor</a> · <a href="other-british-marques.html">Other marques</a> · <a href="sitemap.xml">Sitemap</a></p>
+    <p style="margin:0 0 .8rem"><a href="jaguar-restoration.html">Jaguar</a> · <a href="mg-restoration.html">MG</a> · <a href="triumph-restoration.html">Triumph</a> · <a href="austin-healey-restoration.html">Austin-Healey</a> · <a href="mini-restoration.html">Mini</a> · <a href="morris-minor-restoration.html">Morris Minor</a> · <a href="american-classics-restoration.html">American classics</a> · <a href="other-british-marques.html">Other marques</a> · <a href="journal.html">Journal</a> · <a href="sitemap.xml">Sitemap</a></p>
     <p style="margin:0">Union Jack British Auto Restoration and Repair · Family-run in San Martin, California since 1988 · <a href="tel:+14086861101">(408) 686-1101</a></p>
   </div>
 </footer>
