@@ -16,7 +16,7 @@
 <meta name="theme-color" content="#12203F">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="preload" href="logo.png" as="image">
-<link rel="preload" href="media/drive-hero.mp4" as="video" type="video/mp4">
+<link rel="preload" href="media/drive-poster.jpg" as="image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -60,7 +60,7 @@
 </header>
 
 <!-- Photoreal full-bleed drive — movie opens mid-scene, no title card -->
-<section class="hero" id="top" aria-label="Featured film of a classic car on a country road">
+<section class="hero" id="top" aria-label="Cinematic drive — British roadster on a country lane at golden hour">
   <div class="hero-media">
     <video
       id="heroVideo"
@@ -69,12 +69,12 @@
       muted
       loop
       playsinline
-      preload="auto"
+      preload="metadata"
       poster="media/drive-poster.jpg"
       aria-hidden="true">
       <source src="media/drive-hero.mp4" type="video/mp4">
     </video>
-    <img class="hero-poster" src="media/drive-poster.jpg" alt="" width="1920" height="1080" decoding="async">
+    <img class="hero-poster" src="media/drive-poster.jpg" alt="British racing green classic roadster on a country lane at golden hour" width="1920" height="1080" decoding="async" fetchpriority="high">
   </div>
   <div class="hero-shade" aria-hidden="true"></div>
   <div class="hero-copy">
@@ -256,6 +256,7 @@
         <h3>Workshop</h3>
         <p>13555 Depot Ave<br>San Martin, CA 95046</p>
         <p><a href="tel:+14086861101">(408) 686-1101</a><br><a href="mailto:info@unionjack.com">info@unionjack.com</a></p>
+        <p class="form-note">Proposed email for this redesign — confirm before production mail. Do not silently revert to sbcglobal.</p>
         <h3>Hours</h3>
         <p>Mon–Fri 9am–5pm<br>Saturday by appointment<br>Sunday closed</p>
       </div>
@@ -325,30 +326,13 @@
 <script type="module">
   import './src/motion.js'
   import './src/compare.js'
+  import './src/site.js'
 
-  const nav = document.getElementById('nav')
-  const toggle = document.getElementById('navToggle')
-  const drawer = document.getElementById('navDrawer')
   const video = document.getElementById('heroVideo')
   const poster = document.querySelector('.hero-poster')
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-  function onScroll() {
-    if (!nav) return
-    nav.classList.toggle('is-solid', (window.scrollY || 0) > 24)
-  }
-  window.addEventListener('scroll', onScroll, { passive: true })
-  onScroll()
-
-  if (toggle && drawer) {
-    toggle.addEventListener('click', () => {
-      const open = toggle.getAttribute('aria-expanded') === 'true'
-      toggle.setAttribute('aria-expanded', open ? 'false' : 'true')
-      if (open) drawer.setAttribute('hidden', '')
-      else drawer.removeAttribute('hidden')
-    })
-  }
-
-  if (video) {
+  if (video && !reduced) {
     const markPlaying = () => {
       poster?.classList.add('is-hidden')
       video.classList.add('is-playing')

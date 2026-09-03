@@ -47,7 +47,7 @@
   "foundingDate":"1988",
   "priceRange":"$$$$",
   "openingHoursSpecification":[
-    {"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"08:00","closes":"17:00"}
+    {"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"09:00","closes":"17:00"}
   ],
   "areaServed":[
     {"@type":"AdministrativeArea","name":"Santa Clara County"},
@@ -66,22 +66,42 @@
 
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<header class="site">
-  <a class="brand" href="index.html" aria-label="Union Jack Ltd. home">
-    <img src="logo.png" width="160" height="80" alt="Union Jack Ltd. badge — British Automotive Restoration, San Martin California">
-  </a>
-  <nav aria-label="Primary">
-  <a href="index.html">Home</a>
-  <a href="services.html">Services</a>
-  <a href="process.html">Process</a>
-  <a href="reviews.html">Reviews</a>
-  <a href="faq.html">FAQ</a>
-  <a href="careers.html">Careers</a>
-  <a href="journal.html">Journal</a>
-  <a href="index.html#quote">Get a Quote</a>
-  <a class="cta" href="tel:+14086861101">Call</a>
-</nav>
+<header class="nav is-solid page-nav" id="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html" aria-label="Union Jack home">
+      <img src="logo.png" width="120" height="60" alt="Union Jack">
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="services.html">Services</a>
+      <a href="process.html">Process</a>
+      <a href="index.html#marques">Marques</a>
+      <a href="faq.html">FAQ</a>
+      <a href="journal.html">Journal</a>
+      <a href="index.html#quote" class="nav-cta">Get a quote</a>
+      <a href="tel:+14086861101" class="nav-phone">(408) 686-1101</a>
+    </nav>
+    <button type="button" class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navDrawer" aria-label="Open menu">Menu</button>
+  </div>
+  <div class="nav-drawer" id="navDrawer" hidden>
+    <a href="services.html">Services</a>
+    <a href="process.html">Process</a>
+    <a href="jaguar-restoration.html">Jaguar</a>
+    <a href="mg-restoration.html">MG</a>
+    <a href="triumph-restoration.html">Triumph</a>
+    <a href="austin-healey-restoration.html">Austin-Healey</a>
+    <a href="mini-restoration.html">Mini</a>
+    <a href="morris-minor-restoration.html">Morris Minor</a>
+    <a href="american-classics-restoration.html">American classics</a>
+    <a href="other-british-marques.html">Other British</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="faq.html">FAQ</a>
+    <a href="careers.html">Careers</a>
+    <a href="journal.html">Journal</a>
+    <a href="index.html#quote">Get a quote</a>
+    <a href="tel:+14086861101">Call (408) 686-1101</a>
+  </div>
 </header>
+
 <main id="main">
   <header class="hero-m">
     <p class="kicker">Union Jack Ltd. · San Martin, CA</p>
@@ -92,41 +112,33 @@
   <section class='prose'><h2>Period-correct materials</h2><p>We aim for vinyl, leather, and carpet choices that suit the model rather than a generic modern look, unless you request a custom interior.</p><h2>Coordinate with paint &amp; body</h2><p>On full restorations, trim goes on after paint and mechanical assembly so edges and seals fit cleanly. See <a href='process.html'>our process</a>.</p><p><a class='btn' href='index.html#quote'>Request an estimate</a></p></section>
 </main>
 
-<footer>
-  <div>
-    <strong>Union Jack Ltd.</strong><br>
-    British Automotive Restoration<br>
-    Est. 1988 · San Martin, California
+<footer class="site-foot">
+  <div class="shell foot-grid">
+    <div>
+      <strong>Union Jack</strong>
+      <p>British Auto Restoration<br>Est. 1988 · San Martin, CA</p>
+    </div>
+    <div>
+      <a href="tel:+14086861101">(408) 686-1101</a><br>
+      <a href="mailto:info@unionjack.com">info@unionjack.com</a>
+      <p style="margin-top:.6rem;font-size:.85rem;color:#8E97A8">Proposed address — confirm before production mail.</p>
+    </div>
+    <div class="foot-links">
+      <a href="services.html">Services</a>
+      <a href="process.html">Process</a>
+      <a href="faq.html">FAQ</a>
+      <a href="reviews.html">Reviews</a>
+      <a href="careers.html">Careers</a>
+      <a href="journal.html">Journal</a>
+      <a href="index.html#quote">Quote</a>
+    </div>
   </div>
-  <div>
-    <a href="tel:+14086861101">(408) 686-1101</a><br>
-    <a href="mailto:info@unionjack.com">info@unionjack.com</a><br>
-    <span style="font-size:.78rem;opacity:.75">Confirm mailbox is live before relying on it.</span>
+  <div class="shell foot-fine">
+    <p>© 2026 Union Jack Ltd. · 13555 Depot Ave, San Martin, CA 95046 · <a href="sitemap.xml">Sitemap</a></p>
   </div>
-  <div>
-    John &amp; Marcello Locascio<br>
-    13555 Depot Ave, San Martin, CA 95046<br>
-    <a href="https://maps.google.com/?q=Union+Jack+Ltd+San+Martin+CA" rel="noopener">Google Maps</a>
-  </div>
-  <div>
-    <a href="services.html">Services</a> ·
-    <a href="process.html">Process</a> ·
-    <a href="faq.html">FAQ</a> ·
-    <a href="reviews.html">Reviews</a> ·
-    <a href="careers.html">Careers</a> ·
-    <a href="journal.html">Journal</a><br>
-    <a href="jaguar-restoration.html">Jaguar</a> ·
-    <a href="mg-restoration.html">MG</a> ·
-    <a href="triumph-restoration.html">Triumph</a> ·
-    <a href="austin-healey-restoration.html">Austin-Healey</a> ·
-    <a href="mini-restoration.html">Mini</a> ·
-    <a href="morris-minor-restoration.html">Morris Minor</a> ·
-    <a href="american-classics-restoration.html">American Classics</a> ·
-    <a href="other-british-marques.html">Other British</a>
-  </div>
-  <p class="fine">© 2026 Union Jack Ltd. All rights reserved. · Designed for search engines and answer engines alike.</p>
 </footer>
 
 <a class="sticky-call" href="tel:+14086861101">Call (408) 686-1101</a>
+<script type="module" src="src/site.js"></script>
 </body>
 </html>

@@ -4,19 +4,20 @@
 | Item | Status |
 |---|---|
 | Local serve | Done (`python3 -m http.server 8000` / `npm run dev`) |
-| Screenshots 1440 / 390 | Done (see `/opt/cursor/artifacts/final-shots/`) |
-| Lighthouse baseline (earlier pass) | Homepage previously 100/100/100/100 after progressive WebGL; re-run after video hero |
-| Fonts EB Garamond / IBM Plex | Linked; render confirmed in CSS |
+| Screenshots 1440 / 390 | Done (artifacts under `/opt/cursor/artifacts/`) |
+| Lighthouse | Re-run after British hero + marque chrome pass |
+| Fonts EB Garamond / IBM Plex | Linked |
 
 ## Task 2 — photoreal hero
 | Item | Status |
 |---|---|
-| Throw procedural geometry | Done — homepage no longer loads `drive.js` |
+| Throw procedural geometry | Done — homepage does not load `drive.js` |
 | Photoreal film open (no black card) | Done — full-bleed `media/drive-hero.mp4` + poster |
-| British roadster (E-Type / Healey / MGA) | **Blocked** — needs Higgsfield Desktop auth to generate marque-accurate clip |
-| Realtime GLTF + HDRI + full post stack (r160+) | **Not shipped** — cannot honestly meet 60fps / LCP / 8MB without licensed assets; used prompt’s **pre-rendered cinematic loop** alternative |
-| Poster first, then live media | Done |
+| British roadster (E-Type / Healey / MGA) | Done for poster + hero loop (BRG roadster, golden hour). Continuous live-action drive clip still improves with Higgsfield once authenticated |
+| Realtime GLTF + HDRI + full post (r160+) | **Not shipped** — cannot honestly meet 60fps / LCP / 8MB; used prompt’s **pre-rendered cinematic loop** |
+| Poster first, then live media | Done (`preload` poster; video `preload=metadata`) |
 | Tiered fallback / reduced-motion | Done (poster stays) |
+| Hero assets under 8MB | Done (~2.9MB video + ~185KB poster) |
 
 ## Task 3 — motion
 | Item | Status |
@@ -29,26 +30,30 @@
 ## Task 4 — layout
 | Item | Status |
 |---|---|
-| Editorial rhythm, badge palette, plates not cards | Done on homepage |
-| Before/after slider | Done (`#compare`, marked TODO for true same-car pair) |
-| Marque pages full editorial rebuild | Partial — content/SEO intact; chrome still older `top` pattern |
-| Type contrast / whitespace | Done on homepage redesign |
+| Editorial rhythm, badge palette, plates not cards | Done |
+| Before/after slider | Done (`#compare`, TODO for true same-car pair) |
+| Marque pages full-bleed photo heroes + shared chrome | Done |
+| No all-caps eyebrows / templated cards | Done (sentence-case eyebrows) |
+| Type contrast / whitespace | Done |
 
 ## Build order extras
 | Item | Status |
 |---|---|
 | Extract `styles.css` / `drive.js` | Done |
-| Vite | Done (`npm run dev` / `npm run build`) |
-| Quote form + photo | Done (FormSubmit → proposed `info@unionjack.com`) |
+| Vite | Done |
+| Quote form + photo | Done (FormSubmit → proposed `info@unionjack.com`, flagged) |
 | Mini + American classics + Journal | Done |
 | Process / FAQ / Reviews / Careers / Services | Done |
 | Sitemap / robots AI bots | Done |
 | Concours spelling / NAP / tel: / no telephone=no | Done |
 | Answer-first + FAQ schema parity | Done |
-| Own-domain photos / live Google feed / vector logo | Production TODOs (flagged) |
+| Opening hours 9–5 in schema | Done |
+| `LICENSES.md` | Done |
+| Own-domain photos / live Google feed / vector logo | Production TODOs |
 | Push to `Union-Jack-Rebuild-` | **Blocked** — Cursor GitHub App 403 |
-| Higgsfield British-car hero swap | **Blocked** — MCP `needsAuth` (Desktop sign-in) |
+| Higgsfield continuous-drive swap | Optional upgrade — MCP `needsAuth` |
 
-## How to unblock the two remaining production blockers
-1. **Higgsfield:** Cursor Desktop → Settings → MCP → Higgsfield → Connect → reply “Higgsfield authenticated”
-2. **GitHub:** Grant Cursor GitHub App write on `HarrisCrypto/Union-Jack-Rebuild-` → reply “retry push”
+## Honest gaps left for the client
+1. Authenticate Higgsfield → continuous live-action British drive clip (optional polish).
+2. Grant Cursor GitHub App write on `HarrisCrypto/Union-Jack-Rebuild-` → push + Pages.
+3. Supply a true same-car before/after pair; confirm `info@unionjack.com`; re-host Wix images; vector logo; live Google reviews.

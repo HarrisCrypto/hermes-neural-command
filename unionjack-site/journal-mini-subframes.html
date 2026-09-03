@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,18 +22,42 @@
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<div class="top"><div class="wrap">
-  <a href="index.html"><img src="logo.png" alt="Union Jack British Auto Restoration and Repair, established 1988"></a>
-  <nav aria-label="Primary">
-    <a href="index.html">Home</a>
-        <a href="services.html">Services</a>
-        <a href="process.html">Process</a>
-        <a href="faq.html">FAQ</a>
-    <a href="journal.html">Journal</a>
+<header class="nav is-solid page-nav" id="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html" aria-label="Union Jack home">
+      <img src="logo.png" width="120" height="60" alt="Union Jack">
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="services.html">Services</a>
+      <a href="process.html">Process</a>
+      <a href="index.html#marques">Marques</a>
+      <a href="faq.html">FAQ</a>
+      <a href="journal.html">Journal</a>
+      <a href="index.html#quote" class="nav-cta">Get a quote</a>
+      <a href="tel:+14086861101" class="nav-phone">(408) 686-1101</a>
+    </nav>
+    <button type="button" class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navDrawer" aria-label="Open menu">Menu</button>
+  </div>
+  <div class="nav-drawer" id="navDrawer" hidden>
+    <a href="services.html">Services</a>
+    <a href="process.html">Process</a>
+    <a href="jaguar-restoration.html">Jaguar</a>
+    <a href="mg-restoration.html">MG</a>
+    <a href="triumph-restoration.html">Triumph</a>
+    <a href="austin-healey-restoration.html">Austin-Healey</a>
     <a href="mini-restoration.html">Mini</a>
-    <a href="index.html#quote">Quote</a>
-  </nav>
-</div></div>
+    <a href="morris-minor-restoration.html">Morris Minor</a>
+    <a href="american-classics-restoration.html">American classics</a>
+    <a href="other-british-marques.html">Other British</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="faq.html">FAQ</a>
+    <a href="careers.html">Careers</a>
+    <a href="journal.html">Journal</a>
+    <a href="index.html#quote">Get a quote</a>
+    <a href="tel:+14086861101">Call (408) 686-1101</a>
+  </div>
+</header>
+
 <nav class="crumb" aria-label="Breadcrumb"><div class="wrap">
   <a href="index.html">Home</a> &rsaquo; <a href="journal.html">Journal</a> &rsaquo; Mini structure
 </div></nav>
@@ -51,10 +75,34 @@
   <p><a class="btn btn-solid" href="mini-restoration.html">Mini restoration</a>
      &nbsp; <a href="index.html#quote">Request a quote</a></p>
 </div></main>
-<footer class="foot"><div class="wrap">
-  <p style="margin:0">Union Jack British Auto Restoration · 13555 Depot Ave, San Martin, CA 95046 · <a href="tel:+14086861101">(408) 686-1101</a></p>
-</div></footer>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Where classic Minis usually need steel","datePublished":"2026-09-01","dateModified":"2026-09-01","author":{"@type":"Organization","name":"Union Jack British Auto Restoration and Repair"},"publisher":{"@type":"AutoRepair","name":"Union Jack British Auto Restoration and Repair","url":"https://www.unionjack.com/"},"mainEntityOfPage":"https://www.unionjack.com/journal-mini-subframes.html","description":"How Union Jack assesses classic Mini structure: subframes, floors, A-panels and heelboard before any quote."}</script>
+<footer class="site-foot">
+  <div class="shell foot-grid">
+    <div>
+      <strong>Union Jack</strong>
+      <p>British Auto Restoration<br>Est. 1988 · San Martin, CA</p>
+    </div>
+    <div>
+      <a href="tel:+14086861101">(408) 686-1101</a><br>
+      <a href="mailto:info@unionjack.com">info@unionjack.com</a>
+      <p style="margin-top:.6rem;font-size:.85rem;color:#8E97A8">Proposed address — confirm before production mail.</p>
+    </div>
+    <div class="foot-links">
+      <a href="services.html">Services</a>
+      <a href="process.html">Process</a>
+      <a href="faq.html">FAQ</a>
+      <a href="reviews.html">Reviews</a>
+      <a href="careers.html">Careers</a>
+      <a href="journal.html">Journal</a>
+      <a href="index.html#quote">Quote</a>
+    </div>
+  </div>
+  <div class="shell foot-fine">
+    <p>© 2026 Union Jack Ltd. · 13555 Depot Ave, San Martin, CA 95046 · <a href="sitemap.xml">Sitemap</a></p>
+  </div>
+</footer>
+
 <a class="sticky-call" href="tel:+14086861101">Call (408) 686-1101</a>
+<script type="module" src="src/site.js"></script>
 </body>
 </html>

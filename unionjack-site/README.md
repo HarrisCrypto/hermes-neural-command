@@ -16,15 +16,16 @@ npm run build    # dist/
 
 ## Hero approach (Task 2)
 
-Real-time photoreal Three.js (GLTF roadster + HDRI + GTAO + motion blur + DoF) cannot honestly hit the **60fps / LCP &lt; 2.5s / &lt;8MB** budget on an M1 Air without licensed models, KTX2 textures, and weeks of art direction — and we still lack a licensed E-Type/Healey/MGA GLTF.
+Real-time photoreal Three.js (GLTF roadster + HDRI + GTAO + motion blur + DoF) cannot honestly hit the **60fps / LCP &lt; 2.5s / &lt;8MB** budget without licensed models and KTX2 textures.
 
-Per the prompt’s explicit alternative (Apple-style), the shipped hero is a **photoreal pre-rendered cinematic video loop** with an immediate poster swap:
+Per the prompt’s explicit alternative (Apple-style), the shipped hero is a **photoreal pre-rendered cinematic loop** of a British racing green roadster at golden hour:
 
-- Poster paints first → video autoplays muted when ready
+- `media/drive-poster.jpg` paints immediately (~185KB)
+- `media/drive-hero.mp4` (~2.9MB) autoplays muted when ready
 - `prefers-reduced-motion` keeps the poster
-- Higgsfield MCP can replace `media/drive-hero.mp4` with a British-marque-specific clip once Desktop auth is complete
+- See `LICENSES.md` and `GROK-SCORECARD.md`
 
-Legacy `drive.js` (r128 procedural) is retained only as archive; it is not loaded on the homepage.
+Legacy `drive.js` (r128 procedural) is archive only; not loaded on the homepage.
 
 ## Design system
 
