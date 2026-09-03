@@ -1,6 +1,6 @@
 # Union Jack British Auto Restoration — static site
 
-Standalone marketing site for Union Jack (San Martin, CA). Plain HTML, CSS and one Three.js scene. No build step.
+Standalone marketing site for Union Jack (San Martin, CA). Plain HTML, CSS and one Three.js country-lane WebGL scene. No build step. Built against the SEO/AEO brief: answer-first copy, marque pages, schema, FAQ, Process, Services, Reviews, Careers, Journal.
 
 ## Local preview
 
@@ -9,6 +9,13 @@ python3 -m http.server 8000
 ```
 
 Open http://127.0.0.1:8000/
+
+## Site map
+
+- `index.html` — full-screen interactive drive hero + marque plates + quote form
+- Marque pages — Jaguar, MG, Triumph, Austin-Healey, Mini, Morris Minor, American classics, other British
+- `services.html` + Engine / Paint / Upholstery / Electrical
+- `process.html`, `faq.html`, `reviews.html`, `careers.html`, `journal.html`
 
 ## Quote form
 
